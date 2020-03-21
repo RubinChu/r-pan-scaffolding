@@ -1,0 +1,85 @@
+/**
+  *@Description      
+  *@auther  chuqian
+  *@create  2019-09-11 11:03
+  *@version 1.0.0
+  */
+
+.page-content .r-pan-title-content {
+    position: relative;
+    display: block;
+    height: 100px;
+    line-height: 100px;
+    width: 100%;
+    background-color: #393D49;
+}
+
+.page-content .r-pan-title-content .r-pan-title-font-content {
+    display: inline-block;
+    position: absolute;
+    left: 100px;
+}
+
+.page-content .r-pan-title-content .r-pan-title-font-content .r-pan-title-font {
+    font-size: 40px;
+    font-weight: bold;
+    color: #FF5722;
+}
+
+.page-content .r-pan-title-content .r-pan-username-content {
+    position: absolute;
+    display: inline-block;
+    right: 100px;
+}
+
+.page-content .r-pan-title-content .r-pan-username-content .r-pan-username-font {
+    font-size: 15px;
+    color: #FF5722;
+}
+
+.page-content .r-pan-title-content .r-pan-username-content .r-pan-exit-button {
+    cursor: pointer;
+    font-size: 15px;
+    color: #FF5722;
+    margin-left: 10px;
+}
+
+/*超链接样式类*/
+.link {
+    color: #999;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.link:hover {
+    color: #e80012;
+}
+
+.link-text {
+    color: #999;
+    text-decoration: none;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0 20px;
+    height: 40px;
+    line-height: 40px;
+    vertical-align: middle;
+    border: none;
+    background: #FF5722;
+    font-size: 17px;
+    font-weight: bold;
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/*定宽布局*/
+.w {
+    width: 1080px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}

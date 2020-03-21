@@ -1,0 +1,90 @@
+/**
+  *@Description
+  *@auther  chuqian
+  *@create  2019-09-29 10:02
+  *@version 1.0.0
+  */
+
+.page-content .btn-content {
+    margin-top: 20px;
+}
+
+.page-content .btn-content .go-back-content {
+    margin-left: 50px;
+}
+
+.page-content .btn-content .operate-btn-content {
+    margin-left: 20%;
+}
+
+.page-content .btn-content .breadcrumb-content {
+    height: 38px;
+    line-height: 38px;
+}
+
+.page-content .file-list-content {
+    width: 100%;
+}
+
+.page-content .file-list-content .file-list-item-content {
+    display: block;
+    float: left;
+    width: 150px;
+    height: 150px;
+    border-radius: 25px;
+    line-height: 300px;
+    margin: 10px 25px 10px 25px;
+}
+
+.page-content .file-list-content .file-list-item-content .file-list-item-file-icon-content {
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+}
+
+.page-content .file-list-content .file-list-item-content .file-list-item-file-icon-content a {
+    margin-top: 20px;
+    font-size: 60px;
+    color: #2F4056;
+}
+
+.page-content .file-list-content .file-list-item-content .file-list-item-file-name-content {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+.page-content .file-list-content .file-list-item-content .file-list-item-file-name-content .file-list-item-file-name:hover {
+    color: #01AAED;
+    cursor: pointer;
+}
+
+.check {
+    background-color: #c2c2c2;
+}
+
+.hide {
+    display: none;
+}
+
+#file_upload_progress_content {
+    width: 450px;
+    text-align: center;
+    padding: 20px 20px 0 20px;
+}
+
+#file_upload_progress_content .layui-progress {
+    width: 100%;
+}
+
+#check_all_btn {
+    margin-right: 20px;
+}
+
+#recheck_all_btn {
+    margin-right: 20px;
+}
+
+#transfer_file_btn {
+    background-color: #5FB878;
+}

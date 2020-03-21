@@ -1,0 +1,4 @@
+#线上环境改为pro
+spring:
+  profiles:
+    active: dev
