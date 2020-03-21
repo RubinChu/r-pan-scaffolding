@@ -5,7 +5,18 @@
 一个个人文件管理系统的源码脚手架，[r-pan](http://pan.rubinchu.com)基于此脚手架搭建，希望对有快速搭建个人博客的小伙伴有所帮助   
 
 #### 网站图片
-
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/093944_ed89b5a3_1506368.png "WX20200321-093130@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/093953_0681943e_1506368.png "WX20200321-093154@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094001_bbf509d9_1506368.png "WX20200321-093254@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094010_fab361a4_1506368.png "WX20200321-093304@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094022_01d7ff6a_1506368.png "WX20200321-093351@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094029_246d5502_1506368.png "WX20200321-093413@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094039_2a92e402_1506368.png "WX20200321-093437@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094051_79c0b627_1506368.png "WX20200321-093458@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094101_76a6cdce_1506368.png "WX20200321-093538@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094109_f37c3c23_1506368.png "WX20200321-093627@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094118_ed112c2c_1506368.png "WX20200321-093705@2x.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0321/094127_f2604d8e_1506368.png "WX20200321-093724@2x.png")
 
 #### 软件架构
 
