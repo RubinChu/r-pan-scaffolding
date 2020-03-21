@@ -1,36 +1,33 @@
 # r-pan-scaffolding
 
 #### Description
-一个简单地文件管理系统，实现了文件的上传、下载、移动等功能，支持大部分类型文件的预览，支持视频浏览，音乐播放等。。。
+Source scaffolding for a personal file management system,[r-pan](http://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal blog quickly.
+
+#### Website image
+
 
 #### Software Architecture
-Software architecture description
 
-#### Installation
+SpringBoot 2.x Back office basic framework  
+thymeleaf SpringBoot's default template engine
+jQuery Traditional front-end framework
+Mybaits Traditional ORM framework  
+lombox getter setter plugin  
+druid Database connection pool   
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+#### Installation tutorial
 
-#### Instructions
+ **_prompt:_** After running this project, the partners can import the project into the project, find all TODOs in the project, and modify them according to the prompts, which will greatly reduce the shelf modification time of the partners. All TODOs are the configuration information that I specially marked out for modification.
+*  **Environment required to run this project:** JDK、MySQL、Nginx，please install before commissioning  
+*  **About Nginx：** There are a lot of online information on Nginx installation. Please find the installation by yourself. For the configuration file of Nginx static resource forwarding, please refer to the configuration file under the nginx folder under resources in the project.
+*  **Anout Database：** Please install the Mysql database by yourself. After installation, run the sql script under the sql folder under resources to create the user table.
+*  **About Project：** Paste the source code into the partner's own project, find all TODOs in the IDE and modify the configuration according to the prompts. Just start the SpringBoot project.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+#### Local debugging
 
-#### Contribution
-
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+*   **Commissioning Project：** After the partners have configured the environment according to the installation instructions above, they can start this project just like the usual SpringBoot project. Before starting, please configure all TODOs in the project, configure Nginx static resource forwarding, and start Nginx.
 
 
-#### Gitee Feature
+#### Online deployment instructions
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+*   **Deployment project:** The specific deployment details will not be mentioned (the small partners can deploy in their own way, such as jenkins deployment or manual package deployment). Here I have written the project startup script under the project's run folder. The small partners can Modify the jar package path in the script (if it is a war package deployment, please ignore this deployment instruction). After running the script, a pid.txt file and a pan.log log file will be generated. You can check the running process ID and Project output log
