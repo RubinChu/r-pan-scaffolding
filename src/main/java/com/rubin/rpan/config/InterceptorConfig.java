@@ -14,6 +14,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/file/**", "/user/getUsername");
+        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/", "/video", "/music", "/iframe", "/code");
     }
 }

@@ -35,4 +35,6 @@ public class Constants {
     public static final String LOGIN_SESSION_KEY = "LOGIN_USER_NAME";
 
     public static final String FILE_SHOW_PATH_STR = "fileShowPath";
+
+    public static final String LOGIN_PATH = "/login";
 }
