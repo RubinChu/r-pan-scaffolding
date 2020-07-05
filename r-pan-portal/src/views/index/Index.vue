@@ -128,7 +128,7 @@
                     <el-table
                             ref="fileTable"
                             :data="tableData"
-                            height="100%"
+                            :height="tableHeight"
                             tooltip-effect="dark"
                             style="width: 100%"
                             @selection-change="handleSelectionChange"
@@ -334,7 +334,8 @@
                 operationShowFileId: '',
                 toBeCopiedFileIds: '',
                 toBeTransferredFileIds: '',
-                defaultParentId: ''
+                defaultParentId: '',
+                tableHeight: window.innerHeight - 200
             }
         },
         methods: {

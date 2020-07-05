@@ -20,6 +20,7 @@
         <el-dialog
                 title="修改密码"
                 :visible.sync="changePasswordDialogVisible"
+                :append-to-body="true"
                 width="30%"
                 :center="true">
             <div>
