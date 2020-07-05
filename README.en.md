@@ -23,7 +23,7 @@ v2.0
 SpringBoot 2.x Back office basic framework  
 Mybaits Traditional ORM framework  
 lombox getter setter plugin  
-druid Database connection pool   
+druid Database connection pool    
 Vue2 + ElementUI Front-end basic framework  
 
 #### Installation tutorial

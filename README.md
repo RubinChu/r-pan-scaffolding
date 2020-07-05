@@ -25,7 +25,7 @@ v2.0
 SpringBoot 2.x 后台基本框架  
 Mybaits 传统的ORM框架  
 lombox getter setter插件  
-druid 数据库连接池
+druid 数据库连接池 
 Vue2 + ElementUI 前端基础框架   
 
 #### 安装教程
