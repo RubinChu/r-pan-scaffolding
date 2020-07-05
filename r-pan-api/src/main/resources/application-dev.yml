@@ -1,0 +1,77 @@
+server:
+  port: 7000
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 3072MB
+      max-request-size: 3072MB
+  datasource:
+    # TODO Configure your database connection information
+    url: jdbc:mysql://mysql-address/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    platform: mysql
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 100
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validationQuery: select 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      filters: config,wall,stat
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      maxOpenPreparedStatements: 20
+      connectionProperties: druid.stat.slowSqlMillis=200;druid.stat.logSlowSql=true;config.decrypt=false
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: /druid/*,*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico
+        session-stat-enable: true
+        session-stat-max-count: 10
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: true
+        login-username: admin
+        login-password: admin
+  redis:
+    database: 1
+    # TODO Configure your redis address and auth
+    host: redis-host
+    port: 6379
+    password: auth-password
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 10000
+
+mybatis:
+  mapperLocations: classpath:mappers/*.xml
+  typeAliasesPackage: com.rubin.rpan.entity
+
+file:
+  root:
+    # TODO The physical address prefix of the uploaded file storage
+    path: path
+    # TODO File preview prefix
+    nginx-path: nginx-path
+    # Physical path where compressed files are stored
+    zip-path: zip-path
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+        exclude: env,beans

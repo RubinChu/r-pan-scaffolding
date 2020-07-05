@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rubin.rpan.dao.RPanFileMapper">
+    <resultMap id="BaseResultMap" type="com.rubin.rpan.entity.RPanFile">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="file_id" jdbcType="VARCHAR" property="fileId"/>
+        <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
+        <result column="file_name" jdbcType="VARCHAR" property="fileName"/>
+        <result column="real_path" jdbcType="VARCHAR" property="realPath"/>
+        <result column="show_path" jdbcType="VARCHAR" property="showPath"/>
+        <result column="file_size" jdbcType="VARCHAR" property="fileSize"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="create_user" jdbcType="INTEGER" property="createUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user" jdbcType="INTEGER" property="updateUser"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, file_id, parent_id, user_id, file_name, real_path, show_path, file_size, type, create_user,
+    create_time, update_user, update_time
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from r_pan.r_pan_file
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from r_pan.r_pan_file
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.rubin.rpan.entity.RPanFile">
+    insert into r_pan.r_pan_file (id, file_id, parent_id,
+      user_id, file_name, real_path, 
+      show_path, file_size, type, create_user,
+      create_time, update_user, update_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{fileId,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, 
+      #{userId,jdbcType=INTEGER}, #{fileName,jdbcType=VARCHAR}, #{realPath,jdbcType=VARCHAR}, 
+      #{showPath,jdbcType=VARCHAR}, #{fileSize,jdbcType=INTEGER}, #{type,jdbcType=INTEGER},
+      #{createUser,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateUser,jdbcType=INTEGER},
+      #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.rubin.rpan.entity.RPanFile">
+        insert into r_pan.r_pan_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="fileId != null">
+                file_id,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="fileName != null">
+                file_name,
+            </if>
+            <if test="realPath != null">
+                real_path,
+            </if>
+            <if test="showPath != null">
+                show_path,
+            </if>
+            <if test="fileSize != null">
+                file_size,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="createUser != null">
+                create_user,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateUser != null">
+                update_user,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="fileId != null">
+                #{fileId,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="fileName != null">
+                #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="realPath != null">
+                #{realPath,jdbcType=VARCHAR},
+            </if>
+            <if test="showPath != null">
+                #{showPath,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null">
+                #{fileSize,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="createUser != null">
+                #{createUser,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateUser != null">
+                #{updateUser,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.rubin.rpan.entity.RPanFile">
+        update r_pan.r_pan_file
+        <set>
+            <if test="fileId != null">
+                file_id = #{fileId,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="fileName != null">
+                file_name = #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="realPath != null">
+                real_path = #{realPath,jdbcType=VARCHAR},
+            </if>
+            <if test="showPath != null">
+                show_path = #{showPath,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null">
+                file_size = #{fileSize,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="createUser != null">
+                create_user = #{createUser,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.rubin.rpan.entity.RPanFile">
+        update r_pan.r_pan_file
+        set file_id = #{fileId,jdbcType=VARCHAR},
+          parent_id = #{parentId,jdbcType=VARCHAR},
+          user_id = #{userId,jdbcType=INTEGER},
+          file_name = #{fileName,jdbcType=VARCHAR},
+          real_path = #{realPath,jdbcType=VARCHAR},
+          show_path = #{showPath,jdbcType=VARCHAR},
+          file_size = #{fileSize,jdbcType=VARCHAR}
+          type = #{type,jdbcType=INTEGER},
+          create_user = #{createUser,jdbcType=INTEGER},
+          create_time = #{createTime,jdbcType=TIMESTAMP},
+          update_user = #{updateUser,jdbcType=INTEGER},
+          update_time = #{updateTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <!--*******************************************************自定义*******************************************************-->
+
+    <select id="selectByFileId" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        r_pan.r_pan_file
+        WHERE
+        file_id = #{fileId}
+    </select>
+
+    <select id="selectByUserIdAndFileTypeAndParentId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            user_id = #{userId}
+            <if test="parentId != null and parentId != '-1'">
+                AND parent_id = #{parentId}
+            </if>
+            <if test="fileTypes != null">
+                AND type IN
+                <foreach collection="fileTypes" item="fileType" open="(" close=")" separator=",">
+                    #{fileType}
+                </foreach>
+            </if>
+        ORDER BY file_name
+    </select>
+
+    <delete id="deleteBatch">
+        DELETE FROM
+            r_pan.r_pan_file
+        WHERE
+            user_id = #{userId}
+            AND parent_id != 'TOP'
+            AND id IN
+            <foreach collection="rPanFiles" open="(" close=")" item="item" separator=",">
+                #{item.id}
+            </foreach>
+    </delete>
+
+    <select id="selectByFileIds" parameterType="list" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            file_id IN
+            <foreach collection="fileIds" open="(" close=")" item="fileId" separator=",">
+                #{fileId}
+            </foreach>
+    </select>
+
+    <select id="selectByUserIdAndFileType" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            user_id = #{userId}
+            <if test="fileType != null and fileType != -1">
+                AND type = #{fileType}
+            </if>
+        ORDER BY file_name
+    </select>
+
+    <update id="updateParentIdByIds">
+        UPDATE
+            r_pan.r_pan_file
+        SET
+            parent_id = #{parentId}
+        WHERE
+            id IN
+            <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+    </update>
+
+    <select id="selectByUserIdAndFileName" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            user_id = #{userId}
+            AND file_name LIKE CONCAT('%', #{keyword}, '%')
+            AND parent_id != 'TOP'
+            ORDER BY file_name
+    </select>
+
+    <select id="selectByFileIdAndUserId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            file_id = #{fileId}
+            AND user_id = #{userId}
+    </select>
+
+    <select id="selectCountByUserIdAndFileNameAndParentId" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM
+            r_pan.r_pan_file
+        WHERE
+            user_id = #{userId}
+            AND parent_id = #{parentId}
+            AND file_name = #{newFileName}
+  </select>
+
+    <update id="updateFileInfoBatch" parameterType="list">
+        UPDATE r_pan.r_pan_file
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="parent_id = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    <if test="item.parentId != null">
+                        WHEN id = #{item.id} THEN #{item.parentId}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="real_path = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    <if test="item.realPath != null">
+                        WHEN id = #{item.id} THEN #{item.realPath}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="show_path = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    <if test="item.showPath != null">
+                        WHEN id = #{item.id} THEN #{item.showPath}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="file_name = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    <if test="item.fileName != null">
+                        WHEN id = #{item.id} THEN #{item.fileName}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_user = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    <if test="item.userId != null">
+                        WHEN id = #{item.id} THEN #{item.userId}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="update_time = case" suffix="end,">
+                <foreach collection="rPanFiles" item="item" index="index">
+                    WHEN id = #{item.id} THEN NOW()
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="rPanFiles" item="item" index="index" separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <insert id="insertBatch" parameterType="list">
+        INSERT INTO r_pan.r_pan_file (
+        file_id,
+        parent_id,
+        user_id,
+        file_name,
+        real_path,
+        show_path,
+        file_size,
+        type,
+        create_user,
+        create_time,
+        update_user,
+        update_time
+        )
+        VALUES
+        <foreach collection="rPanFiles" separator="," item="item">
+            (
+            #{item.fileId},
+            #{item.parentId},
+            #{item.userId},
+            #{item.fileName},
+            #{item.realPath},
+            #{item.showPath},
+            #{item.fileSize},
+            #{item.type},
+            #{item.createUser},
+            #{item.createTime},
+            #{item.updateUser},
+            #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
