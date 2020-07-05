@@ -1,5 +1,8 @@
 # r-pan-scaffolding
 
+#### Version
+v1.0
+
 #### Description
 Source scaffolding for a personal file management system,[r-pan](http://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal file system quickly.
 
