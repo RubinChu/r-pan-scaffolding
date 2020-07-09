@@ -304,7 +304,7 @@
                         {required: true, message: '请输入文件夹名称', trigger: 'blur'}
                     ]
                 },
-                uploadUrl: panUtil.getUrlPrefix() + 'file/upload',
+                uploadUrl: panUtil.getUrlPrefix() + '/file/upload',
                 uploadProcessDialogVisible: false,
                 percent: 0,
                 downloadLoading: false,
