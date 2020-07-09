@@ -46,4 +46,4 @@ Vue2 + ElementUI Front-end basic framework
 
 #### Written at the end
 
-This project will be continuously updated, and I hope to make a little contribution to the small partners who have this need.
+This project will be continuously updated, and I hope to make a little contribution to the small partners who have this need.Have a problem to be able to private letter author or add QQ: 834123196.
