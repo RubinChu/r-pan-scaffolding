@@ -237,7 +237,8 @@ public class FileServiceImpl implements IFileService {
                 newParentShowPath = targetParentFileInfo.getShowPath();
         Map<String, List<RPanFile>> allFileInfoGroup = getAllFileInfoGroup(userId);
         toBeTransferredFileInfos.stream().forEach(toBeTransferredFileInfo -> {
-            if (!Objects.equals(toBeTransferredFileInfo.getParentId(), targetParentId)) {
+            // 转移的目标文件为文件的原父文件夹或者目标文件为选中的文件列表的某一个文件夹 这两种情况不操作此文件
+            if (!Objects.equals(toBeTransferredFileInfo.getParentId(), targetParentId) && !Objects.equals(toBeTransferredFileInfo.getFileId(), targetParentId)) {
                 Map<String, String> filePhysicalAddress = Maps.newHashMap();
                 RPanFile originParentFileInfo = rPanFileMapper.selectByFileId(toBeTransferredFileInfo.getParentId());
                 String originParentRealPath = originParentFileInfo.getRealPath(),
