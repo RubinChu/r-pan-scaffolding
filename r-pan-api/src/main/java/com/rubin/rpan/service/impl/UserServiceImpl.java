@@ -55,7 +55,7 @@ public class UserServiceImpl implements IUserService {
         }
         RPanUser rPanUser = assembleRPanUser(registerPO);
         try {
-            if (rPanUserMapper.insertSelective(rPanUser) != 1) {
+            if (rPanUserMapper.insertSelective(rPanUser) != Constants.ONE_INT) {
                 return ServerResponse.createByErrorMessage("注册失败");
             }
         } catch (DuplicateKeyException e) {
@@ -145,7 +145,7 @@ public class UserServiceImpl implements IUserService {
                 StringUtils.isEmpty(checkAnswerPO.getAnswer())) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
-        if (rPanUserMapper.selectCountByUsernameAndQuestionAndAnswer(checkAnswerPO) > 0) {
+        if (rPanUserMapper.selectCountByUsernameAndQuestionAndAnswer(checkAnswerPO) > Constants.ZERO_INT) {
             String token = UUIDUtil.getUUID();
             LocalCacheUtil.setKey(checkAnswerPO.getUsername(), token);
             return ServerResponse.createBySuccess(token);
