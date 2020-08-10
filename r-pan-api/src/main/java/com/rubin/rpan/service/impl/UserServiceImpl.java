@@ -220,6 +220,12 @@ public class UserServiceImpl implements IUserService {
         return ServerResponse.createBySuccess("修改密码成功");
     }
 
+    /**
+     * 用户退出登录
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public ServerResponse<String> exit(Integer userId) {
         if (redisUtil.del(Constants.USER_LOGIN_PREFIX + userId)) {
