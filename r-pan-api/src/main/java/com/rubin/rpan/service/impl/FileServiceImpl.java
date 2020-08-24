@@ -116,7 +116,7 @@ public class FileServiceImpl implements IFileService {
         if (Objects.equals(originalFileInfo.getFileName(), newFileName)) {
             return ServerResponse.createByErrorMessage("请使用一个新名称");
         }
-        if (rPanFileMapper.selectCountByUserIdAndFileNameAndParentId(userId, newFileName, originalFileInfo.getParentId()) > 0) {
+        if (rPanFileMapper.selectCountByUserIdAndFileNameAndParentId(userId, newFileName, originalFileInfo.getParentId()) > Constants.ZERO_INT) {
             return ServerResponse.createByErrorMessage("名称已被占用");
         }
         if (Objects.equals(originalFileInfo.getType(), Constants.FileType.DIRECTORY.getCode())) {
@@ -651,7 +651,7 @@ public class FileServiceImpl implements IFileService {
             }
         });
         directoryTreeNodes = directoryTreeNodes.stream().filter(node -> Objects.equals(Constants.TOP_STR, node.getParentId())).collect(Collectors.toList());
-        directoryTreeNodes.get(0).setLabel(Constants.ALL_FILE_CN_STR);
+        directoryTreeNodes.get(Constants.ZERO_INT).setLabel(Constants.ALL_FILE_CN_STR);
         return directoryTreeNodes;
     }
 
