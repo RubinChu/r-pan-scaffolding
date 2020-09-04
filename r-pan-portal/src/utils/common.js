@@ -26,7 +26,7 @@ let panUtil = {
     },
     // TODO modify to service access path
     getUrlPrefix: function () {
-        return 'http://XXXXXXX/api'
+        return 'http://127.0.0.1:7000/'
     }
 }
 
