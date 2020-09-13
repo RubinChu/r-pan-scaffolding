@@ -9,7 +9,7 @@ import java.io.IOException;
  * Cross-domain settings
  * Created by rubin on 2020/6/4.
  */
-@WebFilter(filterName = "CorsFilter ")
+@WebFilter(filterName = "CorsFilter")
 public class CorsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
