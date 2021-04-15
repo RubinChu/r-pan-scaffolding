@@ -1,7 +1,6 @@
 package com.rubin.rpan.common.util;
 
-import com.rubin.rpan.common.constants.Constants;
-import com.rubin.rpan.entity.RPanUser;
+import com.rubin.rpan.common.constant.CommonConstant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,48 +10,60 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Created by rubin on 2020/6/4.
+ * Jwt工具类
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
-
 public class JwtUtil {
 
     /**
-     * Generate successful login token
+     * 秘钥
+     */
+    private final static String JWT_PRIVATE_KEY = "0123456789";
+
+    /**
+     * 刷新时间
+     */
+    private final static String RENEWAL_TIME = "RENEWAL_TIME";
+
+    /**
+     * 生成token
      *
-     * @param rPanUser
+     * @param subject
+     * @param claimKey
+     * @param claimValue
      * @param expire
      * @return
      */
-    public static String generateToken(RPanUser rPanUser, long expire) {
+    public static String generateToken(String subject, String claimKey, String claimValue, Long expire) {
         String token = Jwts.builder()
-                .setSubject(rPanUser.getUsername())
-                .claim(Constants.LOGIN_USER_ID, rPanUser.getId())
-                .claim(Constants.RENEWAL_TIME, new Date(System.currentTimeMillis() + expire / 2))
+                .setSubject(subject)
+                .claim(claimKey, claimValue)
+                .claim(RENEWAL_TIME, new Date(System.currentTimeMillis() + expire / CommonConstant.TWO_LONG))
                 .setExpiration(new Date(System.currentTimeMillis() + expire))
-                .signWith(SignatureAlgorithm.HS256, Constants.JWT_PRIVATE_KEY)
+                .signWith(SignatureAlgorithm.HS256, JWT_PRIVATE_KEY)
                 .compact();
         return token;
     }
 
     /**
-     * Parse token
+     * 解析token
      *
      * @param token
      * @return
      */
-    public static Integer analyzeToken(String token) {
+    public static String analyzeToken(String token, String claimKey) {
         if (StringUtils.isBlank(token)) {
-            return null;
+            return CommonConstant.EMPTY_STR;
         }
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(Constants.JWT_PRIVATE_KEY)
+                    .setSigningKey(JWT_PRIVATE_KEY)
                     .parseClaimsJws(token)
                     .getBody();
-            Object userId = claims.get(Constants.LOGIN_USER_ID);
-            return Objects.isNull(userId) ? null : (Integer) userId;
+            Object userId = claims.get(claimKey);
+            return Objects.isNull(userId) ? CommonConstant.EMPTY_STR : userId.toString();
         } catch (Exception e) {
-            return null;
+            return CommonConstant.EMPTY_STR;
         }
     }
 

@@ -1,28 +1,38 @@
 package com.rubin.rpan.common.exception;
 
-/**
- * Custom exception
- * Created by rubin on 2020/5/30.
- */
+import com.rubin.rpan.common.response.ResponseCode;
+import lombok.Data;
 
+/**
+ * 自定义异常
+ * Created by RubinChu on 2021/1/22 下午 4:11
+ */
+@Data
 public class RPanException extends RuntimeException {
 
-    public RPanException() {
-    }
+    /**
+     * 错误码
+     */
+    private Integer code;
+
+    /**
+     * 错误信息
+     */
+    private String msg;
 
     public RPanException(String message) {
-        super(message);
+        this.code = ResponseCode.ERROR.getCode();
+        this.msg = message;
     }
 
-    public RPanException(String message, Throwable cause) {
-        super(message, cause);
+    public RPanException(Integer code, String msg) {
+        this.code = code;
+        this.msg = msg;
     }
 
-    public RPanException(Throwable cause) {
-        super(cause);
+    public RPanException(ResponseCode responseCode) {
+        this.code = responseCode.getCode();
+        this.msg = responseCode.getDesc();
     }
 
-    public RPanException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

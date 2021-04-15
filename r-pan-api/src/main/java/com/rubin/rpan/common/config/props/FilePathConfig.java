@@ -6,29 +6,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * File base path configuration class
- * Created by rubin on 2020/5/30.
+ * 文件基础路径配置类
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
-
 @Data
 @Accessors(chain = true)
-@Component
+@Component(value = "filePathConfig")
 @ConfigurationProperties(prefix = "file.root")
 public class FilePathConfig {
 
     /**
-     * Actual storage path prefix
+     * 实际存放路径前缀
      */
     private String path;
-
-    /**
-     * Static resource forwarding prefix
-     */
-    private String nginxPath;
-
-    /**
-     * Compressed file path prefix
-     */
-    private String zipPath;
 
 }

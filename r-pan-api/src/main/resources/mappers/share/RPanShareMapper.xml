@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rubin.rpan.modules.share.dao.RPanShareMapper">
+    <resultMap id="BaseResultMap" type="com.rubin.rpan.modules.share.entity.RPanShare">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="share_id" jdbcType="VARCHAR" property="shareId" />
+        <result column="share_name" jdbcType="VARCHAR" property="shareName" />
+        <result column="share_type" jdbcType="INTEGER" property="shareType" />
+        <result column="share_day_type" jdbcType="INTEGER" property="shareDayType" />
+        <result column="share_day" jdbcType="INTEGER" property="shareDay" />
+        <result column="share_end_time" jdbcType="TIMESTAMP" property="shareEndTime" />
+        <result column="share_url" jdbcType="VARCHAR" property="shareUrl" />
+        <result column="share_code" jdbcType="VARCHAR" property="shareCode" />
+        <result column="share_status" jdbcType="BIT" property="shareStatus" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, share_id, share_name, share_type, share_day_type, share_day, share_end_time,
+    share_url, share_code, share_status, create_user, create_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from r_pan.r_pan_share
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from r_pan.r_pan_share
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.rubin.rpan.modules.share.entity.RPanShare">
+        insert into r_pan.r_pan_share (id, share_id, share_name,
+                                 share_type, share_day_type, share_day,
+                                 share_end_time, share_url, share_code,
+                                 share_status, create_user, create_time
+        )
+        values (#{id,jdbcType=INTEGER}, #{shareId,jdbcType=VARCHAR}, #{shareName,jdbcType=VARCHAR},
+                #{shareType,jdbcType=INTEGER}, #{shareDayType,jdbcType=INTEGER}, #{shareDay,jdbcType=INTEGER},
+                #{shareEndTime,jdbcType=TIMESTAMP}, #{shareUrl,jdbcType=VARCHAR}, #{shareCode,jdbcType=VARCHAR},
+                #{shareStatus,jdbcType=BIT}, #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+               )
+    </insert>
+    <insert id="insertSelective" parameterType="com.rubin.rpan.modules.share.entity.RPanShare">
+        insert into r_pan.r_pan_share
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="shareId != null">
+                share_id,
+            </if>
+            <if test="shareName != null">
+                share_name,
+            </if>
+            <if test="shareType != null">
+                share_type,
+            </if>
+            <if test="shareDayType != null">
+                share_day_type,
+            </if>
+            <if test="shareDay != null">
+                share_day,
+            </if>
+            <if test="shareEndTime != null">
+                share_end_time,
+            </if>
+            <if test="shareUrl != null">
+                share_url,
+            </if>
+            <if test="shareCode != null">
+                share_code,
+            </if>
+            <if test="shareStatus != null">
+                share_status,
+            </if>
+            <if test="createUser != null">
+                create_user,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="shareId != null">
+                #{shareId,jdbcType=VARCHAR},
+            </if>
+            <if test="shareName != null">
+                #{shareName,jdbcType=VARCHAR},
+            </if>
+            <if test="shareType != null">
+                #{shareType,jdbcType=INTEGER},
+            </if>
+            <if test="shareDayType != null">
+                #{shareDayType,jdbcType=INTEGER},
+            </if>
+            <if test="shareDay != null">
+                #{shareDay,jdbcType=INTEGER},
+            </if>
+            <if test="shareEndTime != null">
+                #{shareEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="shareUrl != null">
+                #{shareUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="shareCode != null">
+                #{shareCode,jdbcType=VARCHAR},
+            </if>
+            <if test="shareStatus != null">
+                #{shareStatus,jdbcType=BIT},
+            </if>
+            <if test="createUser != null">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.rubin.rpan.modules.share.entity.RPanShare">
+        update r_pan.r_pan_share
+        <set>
+            <if test="shareId != null">
+                share_id = #{shareId,jdbcType=VARCHAR},
+            </if>
+            <if test="shareName != null">
+                share_name = #{shareName,jdbcType=VARCHAR},
+            </if>
+            <if test="shareType != null">
+                share_type = #{shareType,jdbcType=INTEGER},
+            </if>
+            <if test="shareDayType != null">
+                share_day_type = #{shareDayType,jdbcType=INTEGER},
+            </if>
+            <if test="shareDay != null">
+                share_day = #{shareDay,jdbcType=INTEGER},
+            </if>
+            <if test="shareEndTime != null">
+                share_end_time = #{shareEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="shareUrl != null">
+                share_url = #{shareUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="shareCode != null">
+                share_code = #{shareCode,jdbcType=VARCHAR},
+            </if>
+            <if test="shareStatus != null">
+                share_status = #{shareStatus,jdbcType=BIT},
+            </if>
+            <if test="createUser != null">
+                create_user = #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.rubin.rpan.modules.share.entity.RPanShare">
+        update r_pan.r_pan_share
+        set share_id = #{shareId,jdbcType=VARCHAR},
+            share_name = #{shareName,jdbcType=VARCHAR},
+            share_type = #{shareType,jdbcType=INTEGER},
+            share_day_type = #{shareDayType,jdbcType=INTEGER},
+            share_day = #{shareDay,jdbcType=INTEGER},
+            share_end_time = #{shareEndTime,jdbcType=TIMESTAMP},
+            share_url = #{shareUrl,jdbcType=VARCHAR},
+            share_code = #{shareCode,jdbcType=VARCHAR},
+            share_status = #{shareStatus,jdbcType=BIT},
+            create_user = #{createUser,jdbcType=VARCHAR},
+            create_time = #{createTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--===================================================================自定义===================================================================-->
+
+    <select id="selectRPanUserShareUrlVOListByUserId" resultType="com.rubin.rpan.modules.share.vo.RPanUserShareUrlVO">
+        SELECT
+            share_id AS shareId,
+            share_name AS shareName,
+            share_url AS shareUrl,
+            share_code AS shareCode,
+            share_status AS shareStatus,
+            share_type AS shareType,
+            share_day_type AS shareDayType,
+            share_end_time AS shareEndTime,
+            create_time AS createTime
+        FROM
+            r_pan.r_pan_share
+        WHERE
+            create_user = #{userId}
+        ORDER BY create_time DESC
+    </select>
+    
+    <delete id="deleteByShareIdListAndUserId">
+        DELETE FROM r_pan.r_pan_share WHERE share_id IN 
+        <foreach collection="shareIdList" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        AND create_user = #{userId}
+    </delete>
+
+    <select id="selectByShareId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan.r_pan_share
+        WHERE
+            share_id = #{shareId}
+    </select>
+
+    <update id="changeShareStatusByShareId">
+        UPDATE r_pan.r_pan_share SET share_status = #{shareStatus} WHERE share_id IN
+        <foreach collection="shareIds" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+</mapper>

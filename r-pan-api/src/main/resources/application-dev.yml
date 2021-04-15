@@ -8,10 +8,10 @@ spring:
       max-request-size: 3072MB
   datasource:
     # TODO Configure your database connection information
-    url: jdbc:mysql://mysql-address/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://mysql-address/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 123456
+    username: username
+    password: password
     platform: mysql
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -57,17 +57,29 @@ spring:
     timeout: 10000
 
 mybatis:
-  mapperLocations: classpath:mappers/*.xml
-  typeAliasesPackage: com.rubin.rpan.entity
+  mapperLocations: classpath:mappers/**/*.xml
+  typeAliasesPackage: com.rubin.rpan.**.entity
 
 file:
   root:
     # TODO The physical address prefix of the uploaded file storage
     path: path
-    # TODO File preview prefix
-    nginx-path: nginx-path
-    # TODO Physical path where compressed files are stored
-    zip-path: zip-path
+    # TODO The Share URI prefix
+  share:
+    prefix: http://your-domain/share/
+
+# swagger2
+swagger2:
+  show: true
+  group-name: r-pan-api
+  base-package: com.rubin.rpan.modules
+  title: r-pan-api接口文档
+  description: r-pan-api接口文档
+  terms-of-service-url: http://127.0.0.1:${server.port}
+  contact-name: contactName
+  contact-url: contactUrl
+  contact-email: contactEmail
+  version: V3.0
 
 management:
   endpoints:
@@ -75,3 +87,8 @@ management:
       exposure:
         include: "*"
         exclude: env,beans
+
+# 日志级别
+logging:
+  level:
+    root: INFO

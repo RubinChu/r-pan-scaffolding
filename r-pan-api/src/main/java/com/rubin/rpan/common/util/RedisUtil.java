@@ -1,7 +1,8 @@
 package com.rubin.rpan.common.util;
 
-import com.rubin.rpan.common.constants.Constants;
-import lombok.AllArgsConstructor;
+import com.rubin.rpan.common.constant.CommonConstant;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,18 +11,19 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Redis tools
- * Currently only String is used, only String methods are provided
- * Created by RubinChu on 2020/6/9 16:31
+ * Redis工具类
+ * 目前只用到String 只提供String的方法
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@Component
-@AllArgsConstructor
+@Component(value = "redisUtil")
 public class RedisUtil {
 
+    @Autowired
+    @Qualifier(value = "redisTemplate")
     private RedisTemplate redisTemplate;
 
     /**
-     * store key-value pairs
+     * 存储键值对
      *
      * @param key
      * @param value
@@ -32,7 +34,7 @@ public class RedisUtil {
     }
 
     /**
-     * get value
+     * 获取value
      *
      * @param key
      * @return
@@ -40,13 +42,13 @@ public class RedisUtil {
     public String getString(final String key) {
         Object value = redisTemplate.opsForValue().get(key);
         if (Objects.isNull(value)) {
-            return Constants.NULL_STR;
+            return CommonConstant.NULL_STR;
         }
         return String.valueOf(value);
     }
 
     /**
-     * delete key-value pairs
+     * 删除键值对
      *
      * @param keys
      * @return

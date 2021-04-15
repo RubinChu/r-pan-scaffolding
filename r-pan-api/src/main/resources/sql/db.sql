@@ -13,47 +13,128 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `r_pan_file`;
 CREATE TABLE `r_pan_file`
 (
-    `id`          int(11)                                                NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `file_id`     varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件记录ID',
-    `parent_id`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '上级文件夹ID,顶级文件夹为\'TOP\'',
-    `user_id`     int(11)                                                NOT NULL COMMENT '用户ID',
-    `file_name`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件名',
-    `real_path`   varchar(700) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件真实存放路径',
-    `show_path`   varchar(700) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件展示路径',
-    `file_size`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件大小',
-    `type`        int(2)                                                 NOT NULL DEFAULT 0 COMMENT '文件类型（0 文件夹 1 文件 2 压缩文件 3 excel 4 word 5 pdf 6 txt 7 图片 8 音频 9 视频 10 ppt 11 源码文件）',
-    `create_user` int(11)                                                NOT NULL COMMENT '创建人',
-    `create_time` timestamp(0)                                           NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-    `update_user` int(11)                                                NULL     DEFAULT NULL COMMENT '更新人',
-    `update_time` timestamp(0)                                           NULL     DEFAULT NULL COMMENT '更新时间',
+    `id`                        int(11)                                                NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `file_id`                   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件id',
+    `filename`                  varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件名称',
+    `real_path`                 varchar(700) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件物理路径',
+    `file_size`                 varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件实际大小',
+    `file_size_desc`            varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件大小展示字符',
+    `file_suffix`               varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件后缀',
+    `file_preview_content_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件预览的响应头Content-Type的值',
+    `create_user`               varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time`               datetime                                               NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `r_pan_file_ file_id_uindex` (`file_id`) USING BTREE
+    KEY `no_file_id` (`file_id`) USING BTREE COMMENT '文件ID索引'
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 432
-  CHARACTER SET = utf8mb4
+  AUTO_INCREMENT = 3
+  DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_bin
-  ROW_FORMAT = Dynamic;
-
+  ROW_FORMAT = DYNAMIC COMMENT ='物理文件信息表';
 -- ----------------------------
 -- Table structure for r_pan_user
 -- ----------------------------
 DROP TABLE IF EXISTS `r_pan_user`;
 CREATE TABLE `r_pan_user`
 (
-    `id`          int(11)                                                NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `username`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户名',
-    `password`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密码',
-    `salt`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '随机盐值',
-    `question`    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密保问题',
-    `answer`      varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密保答案',
-    `create_time` datetime(0)                                            NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-    `update_time` datetime(0)                                            NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `id`          int(11)                          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`     varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户id',
+    `username`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户名',
+    `password`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密码',
+    `salt`        varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '随机盐值',
+    `question`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密保问题',
+    `answer`      varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '密保答案',
+    `create_time` datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `unique_index_username` (`username`) USING BTREE COMMENT '用户名称唯一索引'
+    UNIQUE KEY `uk_username` (`username`) USING BTREE COMMENT '用户名称唯一索引',
+    UNIQUE KEY `uk_user_id` (`user_id`) USING BTREE COMMENT '用户ID唯一索引'
 ) ENGINE = InnoDB
-  AUTO_INCREMENT = 58
-  CHARACTER SET = utf8mb4
+  DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_bin
-  ROW_FORMAT = Dynamic;
+  ROW_FORMAT = DYNAMIC COMMENT ='用户信息表';
+
+-- ----------------------------
+-- Table structure for r_pan_user_file
+-- ----------------------------
+DROP TABLE IF EXISTS `r_pan_user_file`;
+CREATE TABLE `r_pan_user_file`
+(
+    `id`           int(11)                          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`      varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户ID',
+    `parent_id`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '上级文件夹ID,顶级文件夹为''TOP''',
+    `file_id`      varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件记录ID',
+    `real_file_id` varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '真实文件id',
+    `filename`     varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件名',
+    `folder_flag`  tinyint(1)                       NOT NULL DEFAULT '0' COMMENT '是否是文件夹 （0 否 1 是）',
+    `type`         int(2)                           NOT NULL DEFAULT '0' COMMENT '文件类型（1 普通文件 2 压缩文件 3 excel 4 word 5 pdf 6 txt 7 图片 8 音频 9 视频 10 ppt 11 源码文件 12 csv）',
+    `del_flag`     tinyint(1)                       NOT NULL DEFAULT '0' COMMENT '删除标识（0 否 1 是）',
+    `create_user`  varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '创建人',
+    `create_time`  datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_user`  varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '更新人',
+    `update_time`  datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_file_id` (`file_id`) USING BTREE COMMENT '文件ID唯一索引'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin
+  ROW_FORMAT = DYNAMIC COMMENT ='用户文件信息表';
+
+-- ----------------------------
+-- Table structure for r_pan_user_search_history
+-- ----------------------------
+DROP TABLE IF EXISTS `r_pan_user_search_history`;
+CREATE TABLE `r_pan_user_search_history`
+(
+    `id`             int(11)                          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`        varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '用户id',
+    `search_content` varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '搜索文案',
+    `create_time`    datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`    datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_id_search_content` (`user_id`, `search_content`) USING BTREE COMMENT '用户ID、搜索文案唯一索引'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin COMMENT ='用户搜索历史表';
+
+-- ----------------------------
+-- Table structure for r_pan_share
+-- ----------------------------
+DROP TABLE IF EXISTS `r_pan_share`;
+CREATE TABLE `r_pan_share`
+(
+    `id`             int(11)                          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `share_id`       varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享id',
+    `share_name`     varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享名称',
+    `share_type`     int(2)                           NOT NULL DEFAULT '0' COMMENT '分享类型（0 有提取码）',
+    `share_day_type` int(2)                           NOT NULL DEFAULT '0' COMMENT '分享类型（0 永久有效；1 7天有效；2 30天有效）',
+    `share_day`      int(11)                          NOT NULL DEFAULT '0' COMMENT '分享有效天数（永久有效为0）',
+    `share_end_time` datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '分享结束时间',
+    `share_url`      varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享链接地址',
+    `share_code`     varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享提取码',
+    `share_status`   tinyint(1)                       NOT NULL DEFAULT '0' COMMENT '分享状态（0 正常；1 有文件被删除）',
+    `create_user`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享创建人',
+    `create_time`    datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_share_id` (`share_id`) USING BTREE COMMENT '分享ID唯一索引'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin COMMENT ='用户分享表';
+
+-- ----------------------------
+-- Table structure for r_pan_share_file
+-- ----------------------------
+DROP TABLE IF EXISTS `r_pan_share_file`;
+CREATE TABLE `r_pan_share_file`
+(
+    `id`          int(11)                          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `share_id`    varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享id',
+    `file_id`     varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '文件记录ID',
+    `create_user` varchar(255) COLLATE utf8mb4_bin NOT NULL DEFAULT '' COMMENT '分享创建人',
+    `create_time` datetime                         NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_share_id_file_id` (`share_id`, `file_id`) USING BTREE COMMENT '分享ID、文件ID联合唯一索引'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin COMMENT ='用户分享文件表';
 
 SET FOREIGN_KEY_CHECKS = 1;

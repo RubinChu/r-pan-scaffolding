@@ -1,24 +1,24 @@
 package com.rubin.rpan.common.filter;
 
+import com.rubin.rpan.common.util.HttpUtil;
+
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Cross-domain settings
- * Created by rubin on 2020/6/4.
+ * 跨域设置
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@WebFilter(filterName = "CorsFilter")
+@WebFilter(filterName = "rPanCorsFilter")
 public class CorsFilter implements Filter {
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, PATCH, DELETE, PUT");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "*");
+        HttpUtil.addCorsResponseHeader(response);
         chain.doFilter(req, res);
     }
+
 }

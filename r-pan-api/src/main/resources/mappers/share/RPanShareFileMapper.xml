@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rubin.rpan.modules.share.dao.RPanShareFileMapper">
+    <resultMap id="BaseResultMap" type="com.rubin.rpan.modules.share.entity.RPanShareFile">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="share_id" jdbcType="VARCHAR" property="shareId" />
+        <result column="file_id" jdbcType="VARCHAR" property="fileId" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, share_id, file_id, create_user, create_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from r_pan.r_pan_share_file
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from r_pan.r_pan_share_file
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.rubin.rpan.modules.share.entity.RPanShareFile">
+        insert into r_pan.r_pan_share_file (id, share_id, file_id,
+                                      create_user, create_time)
+        values (#{id,jdbcType=INTEGER}, #{shareId,jdbcType=VARCHAR}, #{fileId,jdbcType=VARCHAR},
+                #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.rubin.rpan.modules.share.entity.RPanShareFile">
+        insert into r_pan.r_pan_share_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="shareId != null">
+                share_id,
+            </if>
+            <if test="fileId != null">
+                file_id,
+            </if>
+            <if test="createUser != null">
+                create_user,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="shareId != null">
+                #{shareId,jdbcType=VARCHAR},
+            </if>
+            <if test="fileId != null">
+                #{fileId,jdbcType=VARCHAR},
+            </if>
+            <if test="createUser != null">
+                #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.rubin.rpan.modules.share.entity.RPanShareFile">
+        update r_pan.r_pan_share_file
+        <set>
+            <if test="shareId != null">
+                share_id = #{shareId,jdbcType=VARCHAR},
+            </if>
+            <if test="fileId != null">
+                file_id = #{fileId,jdbcType=VARCHAR},
+            </if>
+            <if test="createUser != null">
+                create_user = #{createUser,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.rubin.rpan.modules.share.entity.RPanShareFile">
+        update r_pan.r_pan_share_file
+        set share_id = #{shareId,jdbcType=VARCHAR},
+            file_id = #{fileId,jdbcType=VARCHAR},
+            create_user = #{createUser,jdbcType=VARCHAR},
+            create_time = #{createTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--===================================================================自定义===================================================================-->
+
+    <insert id="insertBatch">
+        INSERT INTO r_pan.r_pan_share_file (share_id, file_id, create_user, create_time)
+        VALUES
+        <foreach collection="rPanShareFileList" separator="," item="item">
+            (#{item.shareId}, #{item.fileId}, #{item.createUser}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByShareIdList">
+        DELETE FROM r_pan.r_pan_share_file WHERE share_id IN
+        <foreach collection="shareIdList" open="(" close=")" separator="," item="item">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="selectFileIdsByShareId" resultType="string">
+        SELECT
+            file_id
+        FROM
+            r_pan.r_pan_share_file
+        WHERE
+            share_id = #{shareId}
+    </select>
+
+    <select id="selectShareIdByFileIds" resultType="string">
+        SELECT
+            share_id
+        FROM
+            r_pan.r_pan_share_file
+        WHERE
+            file_id IN
+            <foreach collection="fileIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+    </select>
+
+</mapper>

@@ -1,22 +1,22 @@
 package com.rubin.rpan.common.util;
 
-import com.rubin.rpan.common.constants.Constants;
+import com.rubin.rpan.common.constant.CommonConstant;
 
 import java.util.UUID;
 
 /**
- * @Description UUID tools
- * @auther chuqian
- * @create 2019-09-19 17:06
+ * UUID工具类
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
 public class UUIDUtil {
 
     /**
-     * Get UUID string
+     * 获取UUID字符串
      *
      * @return
      */
     public static String getUUID() {
-        return UUID.randomUUID().toString().replace(Constants.HYPHEN_STR, Constants.EMPTY_STR).toUpperCase();
+        return UUID.randomUUID().toString().replace(CommonConstant.HYPHEN_STR, CommonConstant.EMPTY_STR).toUpperCase();
     }
+
 }

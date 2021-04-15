@@ -5,9 +5,9 @@
 'use strict'
 
 import axios from 'axios'
-import { clearToken, getToken } from "./cookie"
+import { clearToken, getToken } from './cookie'
 import { MessageBox, Message } from 'element-ui'
-import panUtil from "./common";
+import panUtil from './common'
 
 const toLogin = function () {
         // to re-login
@@ -17,7 +17,7 @@ const toLogin = function () {
             type: 'warning'
         }).then(() => {
             clearToken()
-            location.reload()
+            window.location.reload()
         })
     },
     http = axios.create({
@@ -39,18 +39,24 @@ http.interceptors.request.use(config => {
     return config
 }, error => {
     Message.error('请求失败')
-    return Promise.reject(error)
+    console.error(error)
+    return
 })
 
 http.interceptors.response.use(res => {
     if (res.data.status === 10) {
         toLogin()
-        return
+        res.data.message = '您需要重新登陆'
+        return Promise.reject(res.data)
+    }
+    if (res.data.status !== 0) {
+        return Promise.reject(res.data)
     }
     return res.data
 }, error => {
     Message.error('请求失败')
-    return Promise.reject(error)
+    console.error(error)
+    return
 })
 
 export default http

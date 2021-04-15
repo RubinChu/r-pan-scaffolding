@@ -1,18 +1,19 @@
 package com.rubin.rpan.common.util;
 
-import com.rubin.rpan.common.constants.Constants;
+import com.rubin.rpan.common.constant.CommonConstant;
 
 import java.security.MessageDigest;
 
 /**
- * @Description MD5 encryption tools
- * @auther chuqian
- * @create 2019-09-19 17:05
+ * MD5加密工具类
+ * Created by RubinChu on 2021/1/22 下午 4:11
  */
 public class MD5Util {
 
+    private static final String MD5_STR = "MD5";
+
     /**
-     * Get md5 encrypted string
+     * 获取md5加密串
      *
      * @param message
      * @return
@@ -20,9 +21,12 @@ public class MD5Util {
     public static String getMD5(String message) {
         String md5 = "";
         try {
-            MessageDigest md = MessageDigest.getInstance(Constants.MD5_STR);
-            byte[] messageByte = message.getBytes(Constants.UTF_8_STR);
+            // 创建一个md5算法对象
+            MessageDigest md = MessageDigest.getInstance(MD5_STR);
+            byte[] messageByte = message.getBytes(CommonConstant.UTF_8_STR);
+            // 获得MD5字节数组,16 * 8 = 128位
             byte[] md5Byte = md.digest(messageByte);
+            // 转换为16进制字符串
             md5 = bytesToHex(md5Byte);
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,7 +35,7 @@ public class MD5Util {
     }
 
     /**
-     * Binary to hexadecimal
+     * 二进制转十六进制
      *
      * @param bytes
      * @return
@@ -45,10 +49,11 @@ public class MD5Util {
                 num += 256;
             }
             if (num < 16) {
-                hexStr.append(Constants.ZERO_STR);
+                hexStr.append(CommonConstant.ZERO_STR);
             }
             hexStr.append(Integer.toHexString(num));
         }
         return hexStr.toString().toUpperCase();
     }
+
 }
