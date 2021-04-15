@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.rubin</groupId>
 	<artifactId>r-pan-api</artifactId>
-	<version>1.0</version>
+	<version>2.0</version>
 	<name>r-pan-api</name>
 	<description>R Pan project file server</description>
 

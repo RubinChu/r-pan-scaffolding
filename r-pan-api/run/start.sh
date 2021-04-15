@@ -7,6 +7,6 @@ mvn clean package -Dmaven.test.skip=true
 echo package success, start to run the project...
 cd run/
 # TODO modify the physical address deployed for your server project
-nohup java -jar your project physical address/target/r-pan-api-1.0.jar > api.log 2>&1&
+nohup java -jar your project physical address/target/r-pan-api-2.0.jar > api.log 2>&1&
 echo $! > pid.txt
 echo start success
