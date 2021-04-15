@@ -1,10 +1,24 @@
 # r-pan-scaffolding
 
 #### Description
-Source scaffolding for a personal file management system,[r-pan](http://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal file system quickly.
+Source scaffolding for a personal file management system,[r-pan](https://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal file system quickly.
 
 #### Version 
-v2.0
+v3.0
+
+#### Version Updates
+* Added Recycle Bin function
+* Share functionality was added
+* Preview functionality has been optimized. This version will not use Nginx as a static resource server, but will provide its own preview service
+* Fixed some bugs
+
+#### Iterate directions for subsequent releases
+* Optimized Office Preview, which is not supported in this release
+* Optimize your website UI
+* Optimize uploads, support multiple file uploads, breakpoint continuation and so on
+* Optimize download, support breakpoint to continue downloading
+* Optimize sharing, add chat and friend system
+* Coming soon...
 
 #### Website image
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0705/210618_7ae41201_1506368.png "WX20200705-204847@2x.png")
@@ -23,21 +37,21 @@ v2.0
 SpringBoot 2.x Back office basic framework  
 Mybaits Traditional ORM framework  
 lombox getter setter plugin  
+Redis cache middleware
 druid Database connection pool    
 Vue2 + ElementUI Front-end basic framework  
 
 #### Installation tutorial
 
  **_prompt:_** After running this project, the partners can import the project into the project, find all TODOs in the project, and modify them according to the prompts, which will greatly reduce the shelf modification time of the partners. All TODOs are the configuration information that I specially marked out for modification.
-*  **Environment required to run this project:** JDK、MySQL、Nginx，please install before commissioning  
-*  **About Nginx：** There are a lot of online information on Nginx installation. Please find the installation by yourself. 
+*  **Environment required to run this project:** JDK、MySQL,please install before commissioning  
 *  **Anout Database：** Please install the Mysql database by yourself. After installation, run the sql script under the sql folder under resources to create the user table.
 *  **About back-end projects：** Paste the source code into your partner's own project, find all TODO in the IDE and follow the prompts to modify the configuration. Just start the Spring Boot project.
 *  **About front-end projects：** Paste the source code into your partner's own project, find all TODO in the IDE and follow the prompts to modify the configuration. Installation dependencies: npm i (or use cnpm i to accelerate), after installation, use npm run serve to start local debugging, and npm build to package the production environment.
 
 #### Local debugging
 
-*   **Commissioning project：** After the buddy has configured the environment according to the installation instructions above, start two projects to see the effect. Before starting, please configure all TODOs in the project, configure Nginx static resource forwarding, and start Nginx.
+*   **Commissioning project：** After the buddy has configured the environment according to the installation instructions above, start two projects to see the effect. Before starting, please configure all TODOs in the project.
 
 #### Online deployment instructions
 
