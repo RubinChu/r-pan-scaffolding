@@ -9,11 +9,10 @@ v3.0
 #### Version Updates
 * Added Recycle Bin function
 * Share functionality was added
-* Preview functionality has been optimized. This version will not use Nginx as a static resource server, but will provide its own preview service
+* Preview functionality has been optimized. This version will not use Nginx as a static resource server, but will provide its own preview service(**Note: Office Preview must be published to the online environment, not the local environment**)
 * Fixed some bugs
 
 #### Iterate directions for subsequent releases
-* Optimized Office Preview, which is not supported in this release
 * Optimize your website UI
 * Optimize uploads, support multiple file uploads, breakpoint continuation and so on
 * Optimize download, support breakpoint to continue downloading

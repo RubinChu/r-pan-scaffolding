@@ -24,7 +24,7 @@
         methods: {
             init() {
                 let fileId = this.$route.params.fileId
-                this.showPath = "https://view.officeapps.live.com/op/view.aspx?src='" + encodeURI(panUtil.getPreviewUrl(fileId)) + "'"
+                this.showPath = "https://view.officeapps.live.com/op/view.aspx?src=" + escape(panUtil.getPreviewUrl(fileId))
             }
         },
         computed: {},
