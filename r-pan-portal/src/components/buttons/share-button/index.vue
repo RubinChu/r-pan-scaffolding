@@ -110,7 +110,11 @@
                 if (this.item) {
                     this.shareTitle = '分享文件（' + this.handleFilename(this.item.filename) + ')'
                 } else {
-                    this.shareTitle = '分享文件（' + this.handleFilename(this.multipleSelection[0].filename) + '等)'
+                    if (this.multipleSelection.length === 1) {
+                        this.shareTitle = '分享文件（' + this.handleFilename(this.multipleSelection[0].filename) + ')'
+                    } else {
+                        this.shareTitle = '分享文件（' + this.handleFilename(this.multipleSelection[0].filename) + '等)'
+                    }
                 }
                 this.shareDialogVisible = true
             },
