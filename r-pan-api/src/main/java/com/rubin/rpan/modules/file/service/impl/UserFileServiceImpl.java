@@ -129,7 +129,7 @@ public class UserFileServiceImpl implements IUserFileService {
      */
     @Override
     public List<RPanUserFileVO> createFolder(Long parentId, String folderName, Long userId) {
-        saveUserFile(parentId, folderName, FileConstant.FolderFlagEnum.YES, null, null, userId);
+        saveUserFile(parentId, folderName, FileConstant.FolderFlagEnum.YES, null, null, userId, null);
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId, FileConstant.DelFlagEnum.NO.getCode());
     }
 
@@ -188,7 +188,7 @@ public class UserFileServiceImpl implements IUserFileService {
     public List<RPanUserFileVO> upload(MultipartFile file, Long parentId, Long userId) {
         RPanFile rPanFile = uploadRealFile(file, userId);
         String filename = file.getOriginalFilename();
-        saveUserFile(parentId, filename, FileConstant.FolderFlagEnum.NO, fileTypeContext.getFileTypeCode(filename), rPanFile.getFileId(), userId);
+        saveUserFile(parentId, filename, FileConstant.FolderFlagEnum.NO, fileTypeContext.getFileTypeCode(filename), rPanFile.getFileId(), userId, rPanFile.getFileSizeDesc());
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId);
     }
 
@@ -495,9 +495,10 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param folderFlag
      * @param fileType
      * @param realFileId
+     * @param fileSizeDesc
      * @return
      */
-    private RPanUserFile assembleRPanUserFile(Long parentId, Long userId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId) {
+    private RPanUserFile assembleRPanUserFile(Long parentId, Long userId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId, String fileSizeDesc) {
         RPanUserFile rPanUserFile = new RPanUserFile();
         rPanUserFile.setUserId(userId);
         rPanUserFile.setParentId(parentId);
@@ -505,6 +506,7 @@ public class UserFileServiceImpl implements IUserFileService {
         rPanUserFile.setFilename(filename);
         rPanUserFile.setFileType(fileType);
         rPanUserFile.setFolderFlag(folderFlag.getCode());
+        rPanUserFile.setFileSizeDesc(fileSizeDesc);
         rPanUserFile.setRealFileId(realFileId);
         rPanUserFile.setCreateUser(userId);
         rPanUserFile.setCreateTime(new Date());
@@ -522,10 +524,12 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param folderFlag
      * @param fileType
      * @param realFileId
+     * @param userId
+     * @param fileSizeDesc
      * @return
      */
-    private void saveUserFile(Long parentId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId, Long userId) {
-        if (rPanUserFileMapper.insertSelective(assembleRPanUserFile(parentId, userId, filename, folderFlag, fileType, realFileId)) != CommonConstant.ONE_INT) {
+    private void saveUserFile(Long parentId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId, Long userId, String fileSizeDesc) {
+        if (rPanUserFileMapper.insertSelective(assembleRPanUserFile(parentId, userId, filename, folderFlag, fileType, realFileId, fileSizeDesc)) != CommonConstant.ONE_INT) {
             throw new RPanException("保存文件信息失败");
         }
     }
