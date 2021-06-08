@@ -10,7 +10,9 @@ spring:
     # TODO Configure your database connection information
     url: jdbc:mysql://<mysql-address>/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # TODO Configure your database connection information
     username: <username>
+    # TODO Configure your database connection information
     password: <password>
     platform: mysql
     type: com.alibaba.druid.pool.DruidDataSource
@@ -63,9 +65,9 @@ mybatis:
 
 file:
   root:
-    # TODO The physical address prefix of the uploaded file storage
+    # TODO The physical address prefix of the uploaded file storage.
     path: path
-    # TODO The Share URI prefix
+    # TODO The Share URI prefix.example for dev:http://127.0.0.1:7001/share/
   share:
     prefix: http://<your-portal-domain>/share/
 

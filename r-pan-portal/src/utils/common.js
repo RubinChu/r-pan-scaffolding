@@ -27,13 +27,13 @@ let panUtil = {
         const second = date.getSeconds()
         return [year, month, day].map(this.formatNumber).join('-') + ' ' + [hour, minute, second].map(this.formatNumber).join(':')
     },
+    // TODO Your file preview uri prefix. example for dev:http://127.0.0.1:7000/preview?fileId=111&token=xx15456xwwx
     getPreviewUrl(fileId) {
-        return 'http://127.0.0.1:7000/preview?fileId=' + fileId + '&authorization=' + getToken()
-        // return 'https://pan.rubinchu.com/api/preview?fileId=' + fileId + '&authorization=' + getToken()
+        return 'http(s)://api-domain:port/preview?fileId=' + fileId + '&token=' + getToken()
     },
+    // TODO Your http uri prefix. example for dev:http://127.0.0.1:7000/
     getUrlPrefix() {
-        return 'http://127.0.0.1:7000'
-        // return 'https://pan.rubinchu.com/api'
+        return 'http(s)://api-domain:port'
     }
 }
 
