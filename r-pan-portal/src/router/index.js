@@ -51,7 +51,7 @@ const routes = [
                 component: Imgs
             },
             {
-                path: '/mysics',
+                path: '/musics',
                 name: 'Musics',
                 component: Musics
             },
