@@ -44,10 +44,12 @@
                              status-icon
                              @submit.native.prevent>
                         <el-form-item label="分享链接" prop="shareUrl">
-                            <el-link :underline=false type="primary"><span>{{ shareResultForm.shareUrl }}</span></el-link>
+                            <el-link :underline=false type="primary"><span>{{ shareResultForm.shareUrl }}</span>
+                            </el-link>
                         </el-form-item>
                         <el-form-item label="提取码">
-                            <el-link :underline=false type="success"><span>{{ shareResultForm.shareCode }}</span></el-link>
+                            <el-link :underline=false type="success"><span>{{ shareResultForm.shareCode }}</span>
+                            </el-link>
                         </el-form-item>
                         <div class="share-result-button-content">
                             <el-button type="primary" class="share-result-copy-button" @click="copy">

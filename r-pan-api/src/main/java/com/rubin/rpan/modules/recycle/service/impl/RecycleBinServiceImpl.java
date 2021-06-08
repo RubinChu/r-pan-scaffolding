@@ -6,7 +6,8 @@ import com.rubin.rpan.modules.file.vo.RPanUserFileVO;
 import com.rubin.rpan.modules.recycle.service.IRecycleBinService;
 import com.rubin.rpan.modules.share.constant.ShareConstant;
 import com.rubin.rpan.modules.share.service.IShareService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,10 @@ import java.util.List;
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @Service(value = "recycleBinService")
-@Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class RecycleBinServiceImpl implements IRecycleBinService {
+
+    private static final Logger log = LoggerFactory.getLogger(RecycleBinServiceImpl.class);
 
     @Autowired
     @Qualifier(value = "userFileService")
@@ -38,7 +40,7 @@ public class RecycleBinServiceImpl implements IRecycleBinService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> list(String userId) {
+    public List<RPanUserFileVO> list(Long userId) {
         return iUserFileService.list(null, FileConstant.ALL_FILE_TYPE, userId, FileConstant.DelFlagEnum.YES.getCode());
     }
 
@@ -50,9 +52,9 @@ public class RecycleBinServiceImpl implements IRecycleBinService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> restore(String fileIds, String userId) {
+    public List<RPanUserFileVO> restore(String fileIds, Long userId) {
         iUserFileService.restoreUserFiles(fileIds, userId);
-        iShareService.changeShareStatus(fileIds, ShareConstant.ShareStatus.NORMAL);
+        iShareService.refreshShareStatus(iUserFileService.getAllAvailableFileIdByFileIds(fileIds));
         return list(userId);
     }
 
@@ -64,7 +66,7 @@ public class RecycleBinServiceImpl implements IRecycleBinService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> delete(String fileIds, String userId) {
+    public List<RPanUserFileVO> delete(String fileIds, Long userId) {
         iUserFileService.physicalDeleteUserFiles(fileIds, userId);
         return list(userId);
     }

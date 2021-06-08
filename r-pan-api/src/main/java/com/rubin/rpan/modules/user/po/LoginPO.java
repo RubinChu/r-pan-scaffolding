@@ -2,20 +2,17 @@ package com.rubin.rpan.modules.user.po;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 用户登录PO
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@Data
-@Accessors(chain = true)
 @ApiModel(value = "用户登录PO")
 public class LoginPO implements Serializable {
 
@@ -36,5 +33,46 @@ public class LoginPO implements Serializable {
     @NotBlank(message = "密码不能为空")
     @Length(min = 8, max = 16, message = "请输入8-16位的密码")
     private String password;
+
+    public LoginPO() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LoginPO loginPO = (LoginPO) o;
+        return Objects.equals(username, loginPO.username) &&
+                Objects.equals(password, loginPO.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password);
+    }
+
+    @Override
+    public String toString() {
+        return "LoginPO{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 
 }

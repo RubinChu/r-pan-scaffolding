@@ -1,28 +1,23 @@
 package com.rubin.rpan.common.aspect;
 
-import com.rubin.rpan.common.annotation.NeedShareCode;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.response.R;
 import com.rubin.rpan.common.response.ResponseCode;
 import com.rubin.rpan.common.util.JwtUtil;
-import com.rubin.rpan.common.util.RedisUtil;
 import com.rubin.rpan.common.util.ShareIdUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * 请求分享码验证
@@ -30,8 +25,9 @@ import java.lang.reflect.Method;
  */
 @Aspect
 @Component
-@Slf4j
 public class RPanShareCodeAspect {
+
+    private static final Logger log = LoggerFactory.getLogger(RPanShareCodeAspect.class);
 
     /**
      * 分享码token的key
@@ -41,16 +37,12 @@ public class RPanShareCodeAspect {
     /**
      * 分享认证参数名称
      */
-    private static final String SHARE_AUTHENTICATION_PARAM_NAME = "token";
+    private static final String SHARE_AUTHENTICATION_PARAM_NAME = "shareToken";
 
     /**
      * 切点入口
      */
-    private final String POINT_CUT = "execution(* com.rubin.rpan.modules.*.controller..*(..))";
-
-    @Autowired
-    @Qualifier(value = "redisUtil")
-    private RedisUtil redisUtil;
+    private final String POINT_CUT = "@annotation(com.rubin.rpan.common.annotation.NeedShareCode)";
 
     /**
      * 切点
@@ -61,17 +53,15 @@ public class RPanShareCodeAspect {
 
     @Around("shareCodeAuth()")
     public Object loginAuth(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        if (checkNeedShareToken(proceedingJoinPoint)) {
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            HttpServletRequest request = servletRequestAttributes.getRequest();
-            String uri = request.getRequestURI();
-            log.debug("成功拦截到请求,uri为:{}", uri);
-            if (!checkAndSaveShareId(request)) {
-                log.warn("成功拦截到请求,uri为:{}, 检测到用户分享码失效,将跳转至分享码输入页面", uri);
-                return R.fail(ResponseCode.NEED_SHARE_CODE.getCode(), ResponseCode.NEED_SHARE_CODE.getDesc());
-            }
-            log.debug("成功拦截到请求,uri为:{}, 请求通过", uri);
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        String uri = request.getRequestURI();
+        log.debug("成功拦截到请求,uri为:{}", uri);
+        if (!checkAndSaveShareId(request)) {
+            log.warn("成功拦截到请求,uri为:{}, 检测到用户分享码失效,将跳转至分享码输入页面", uri);
+            return R.fail(ResponseCode.NEED_SHARE_CODE.getCode(), ResponseCode.NEED_SHARE_CODE.getDesc());
         }
+        log.debug("成功拦截到请求,uri为:{}, 请求通过", uri);
         return proceedingJoinPoint.proceed();
     }
 
@@ -89,19 +79,12 @@ public class RPanShareCodeAspect {
         if (StringUtils.isEmpty(token)) {
             return false;
         }
-        String shareId = JwtUtil.analyzeToken(token, CommonConstant.SHARE_ID);
-        if (StringUtils.isEmpty(shareId)) {
+        Object shareId = JwtUtil.analyzeToken(token, CommonConstant.SHARE_ID);
+        if (Objects.isNull(shareId)) {
             return false;
         }
-        String redisValue = redisUtil.getString(CommonConstant.SHARE_CODE_PREFIX + shareId);
-        if (StringUtils.isEmpty(redisValue)) {
-            return false;
-        }
-        if (StringUtils.equals(redisValue, token)) {
-            saveShareId(shareId);
-            return true;
-        }
-        return false;
+        saveShareId(shareId);
+        return true;
     }
 
     /**
@@ -109,21 +92,8 @@ public class RPanShareCodeAspect {
      *
      * @param shareId
      */
-    private void saveShareId(String shareId) {
-        ShareIdUtil.set(shareId);
-    }
-
-    /**
-     * 校验是否需要分享码
-     *
-     * @param proceedingJoinPoint
-     * @return
-     */
-    private boolean checkNeedShareToken(ProceedingJoinPoint proceedingJoinPoint) {
-        Signature signature = proceedingJoinPoint.getSignature();
-        MethodSignature methodSignature = (MethodSignature) signature;
-        Method targetMethod = methodSignature.getMethod();
-        return targetMethod.isAnnotationPresent(NeedShareCode.class);
+    private void saveShareId(Object shareId) {
+        ShareIdUtil.set(Long.valueOf(String.valueOf(shareId)));
     }
 
 }

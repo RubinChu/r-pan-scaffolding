@@ -3,11 +3,9 @@ package com.rubin.rpan.modules.user.service.impl;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
 import com.rubin.rpan.common.response.ResponseCode;
-import com.rubin.rpan.common.util.JwtUtil;
-import com.rubin.rpan.common.util.PasswordUtil;
-import com.rubin.rpan.common.util.RedisUtil;
-import com.rubin.rpan.common.util.UUIDUtil;
+import com.rubin.rpan.common.util.*;
 import com.rubin.rpan.modules.file.constant.FileConstant;
+import com.rubin.rpan.modules.file.entity.RPanUserFile;
 import com.rubin.rpan.modules.file.service.IUserFileService;
 import com.rubin.rpan.modules.share.vo.ShareUserInfoVO;
 import com.rubin.rpan.modules.user.constant.UserConstant;
@@ -15,7 +13,7 @@ import com.rubin.rpan.modules.user.dao.RPanUserMapper;
 import com.rubin.rpan.modules.user.entity.RPanUser;
 import com.rubin.rpan.modules.user.service.IUserService;
 import com.rubin.rpan.modules.user.vo.RPanUserVO;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
@@ -30,7 +28,6 @@ import java.util.Objects;
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @Service(value = "userService")
-@Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class UserServiceImpl implements IUserService {
 
@@ -46,6 +43,10 @@ public class UserServiceImpl implements IUserService {
     @Qualifier(value = "redisUtil")
     private RedisUtil redisUtil;
 
+    @Autowired
+    @Qualifier(value = "idGenerator")
+    private IdGenerator idGenerator;
+
     /**
      * 用户注册
      *
@@ -60,7 +61,7 @@ public class UserServiceImpl implements IUserService {
         RPanUser rPanUser = assembleRPanUser(username, password, question, answer);
         saveUserInfo(rPanUser);
         createUserRootFolder(rPanUser);
-        return rPanUser.getUserId();
+        return rPanUser.getUserId().toString();
     }
 
     /**
@@ -84,8 +85,10 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public RPanUserVO info(String userId) {
-        return rPanUserMapper.selectRPanUserVOByUserId(userId);
+    public RPanUserVO info(Long userId) {
+        RPanUser rPanUser = rPanUserMapper.selectByPrimaryKey(userId);
+        RPanUserFile rPanUserFile = iUserFileService.getUserTopFileInfo(userId);
+        return assembleRPanUserVO(rPanUser, rPanUserFile);
     }
 
     /**
@@ -96,11 +99,11 @@ public class UserServiceImpl implements IUserService {
      */
     @Override
     public String checkUsername(String username) {
-        RPanUser rPanUser = rPanUserMapper.selectByUserName(username);
-        if (Objects.isNull(rPanUser)) {
+        String question = rPanUserMapper.selectQuestionByUsername(username);
+        if (StringUtils.isBlank(question)) {
             throw new RPanException("没有此用户");
         }
-        return rPanUser.getQuestion();
+        return question;
     }
 
     /**
@@ -141,7 +144,7 @@ public class UserServiceImpl implements IUserService {
      * @param userId
      */
     @Override
-    public void changePassword(String password, String newPassword, String userId) {
+    public void changePassword(String password, String newPassword, Long userId) {
         RPanUser rPanUser = checkOldPasswordAndGet(userId, password);
         doChangePassword(rPanUser, newPassword);
     }
@@ -153,7 +156,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public void exit(String userId) {
+    public void exit(Long userId) {
         if (redisUtil.del(CommonConstant.USER_LOGIN_PREFIX + userId)) {
             return;
         }
@@ -167,7 +170,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public ShareUserInfoVO getShareUserInfo(String userId) {
+    public ShareUserInfoVO getShareUserInfo(Long userId) {
         ShareUserInfoVO shareUserInfoVO = rPanUserMapper.selectShareUserInfoVOByUserId(userId);
         encryptUsername(shareUserInfoVO);
         return shareUserInfoVO;
@@ -184,14 +187,14 @@ public class UserServiceImpl implements IUserService {
         RPanUser rPanUser = new RPanUser();
         String salt = PasswordUtil.getSalt(),
                 dbPassword = PasswordUtil.encryptPassword(salt, password);
-        rPanUser.setUserId(UUIDUtil.getUUID())
-                .setSalt(salt)
-                .setUsername(username)
-                .setPassword(dbPassword)
-                .setQuestion(question)
-                .setAnswer(answer)
-                .setCreateTime(new Date())
-                .setUpdateTime(new Date());
+        rPanUser.setUserId(idGenerator.nextId());
+        rPanUser.setSalt(salt);
+        rPanUser.setUsername(username);
+        rPanUser.setPassword(dbPassword);
+        rPanUser.setQuestion(question);
+        rPanUser.setAnswer(answer);
+        rPanUser.setCreateTime(new Date());
+        rPanUser.setUpdateTime(new Date());
         return rPanUser;
     }
 
@@ -216,7 +219,7 @@ public class UserServiceImpl implements IUserService {
      * @param rPanUser
      */
     private void createUserRootFolder(RPanUser rPanUser) {
-        iUserFileService.createFolder(CommonConstant.TOP_STR, FileConstant.ALL_FILE_CN_STR, rPanUser.getUserId());
+        iUserFileService.createFolder(CommonConstant.ZERO_LONG, FileConstant.ALL_FILE_CN_STR, rPanUser.getUserId());
     }
 
     /**
@@ -227,7 +230,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     private RPanUser checkUsernameAndPassword(String username, String password) {
-        RPanUser rPanUser = rPanUserMapper.selectByUserName(username);
+        RPanUser rPanUser = rPanUserMapper.selectByUsername(username);
         if (Objects.isNull(rPanUser)) {
             throw new RPanException("用户名错误");
         }
@@ -246,8 +249,23 @@ public class UserServiceImpl implements IUserService {
      */
     private String generateAndSaveToken(RPanUser rPanUser) {
         String token = JwtUtil.generateToken(rPanUser.getUsername(), CommonConstant.LOGIN_USER_ID, rPanUser.getUserId(), CommonConstant.ONE_DAY_LONG);
-        redisUtil.setString(CommonConstant.USER_LOGIN_PREFIX + rPanUser.getUserId(), token, CommonConstant.ONE_DAY_LONG);
+        redisUtil.set(CommonConstant.USER_LOGIN_PREFIX + rPanUser.getUserId(), token, CommonConstant.ONE_DAY_LONG);
         return token;
+    }
+
+    /**
+     * 拼装用户信息返回实体
+     *
+     * @param rPanUser
+     * @param rPanUserFile
+     * @return
+     */
+    private RPanUserVO assembleRPanUserVO(RPanUser rPanUser, RPanUserFile rPanUserFile) {
+        RPanUserVO rPanUserVO = new RPanUserVO();
+        rPanUserVO.setUsername(rPanUser.getUsername());
+        rPanUserVO.setRootFileId(rPanUserFile.getFileId());
+        rPanUserVO.setRootFilename(rPanUserFile.getFilename());
+        return rPanUserVO;
     }
 
     /**
@@ -258,7 +276,7 @@ public class UserServiceImpl implements IUserService {
      */
     private String generateAndSaveCheckAnswerToken(String username) {
         String token = UUIDUtil.getUUID();
-        redisUtil.setString(UserConstant.USER_FORGET_PREFIX + username, token, CommonConstant.FIVE_MINUTES_LONG);
+        redisUtil.set(UserConstant.USER_FORGET_PREFIX + username, token, CommonConstant.FIVE_MINUTES_LONG);
         return token;
     }
 
@@ -269,7 +287,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     private RPanUser checkUsernameExistAndGet(String username) {
-        RPanUser rPanUser = rPanUserMapper.selectByUserName(username);
+        RPanUser rPanUser = rPanUserMapper.selectByUsername(username);
         if (Objects.isNull(rPanUser)) {
             throw new RPanException("用户名不存在");
         }
@@ -284,7 +302,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     private void checkResetPasswordToken(String username, String inputToken) {
-        String token = redisUtil.getString(UserConstant.USER_FORGET_PREFIX + username);
+        Object token = redisUtil.get(UserConstant.USER_FORGET_PREFIX + username);
         if (Objects.isNull(token)) {
             throw new RPanException(ResponseCode.TOKEN_EXPIRE.getCode(), ResponseCode.TOKEN_EXPIRE.getDesc());
         }
@@ -300,8 +318,8 @@ public class UserServiceImpl implements IUserService {
      * @param newPassword
      */
     private void doResetPassword(RPanUser rPanUser, String newPassword) {
-        rPanUser.setPassword(PasswordUtil.encryptPassword(rPanUser.getSalt(), newPassword))
-                .setUpdateTime(new Date());
+        rPanUser.setPassword(PasswordUtil.encryptPassword(rPanUser.getSalt(), newPassword));
+        rPanUser.setUpdateTime(new Date());
         if (rPanUserMapper.updateByPrimaryKeySelective(rPanUser) != CommonConstant.ONE_INT) {
             throw new RPanException("重置密码失败");
         }
@@ -314,8 +332,8 @@ public class UserServiceImpl implements IUserService {
      * @param password
      * @return
      */
-    private RPanUser checkOldPasswordAndGet(String userId, String password) {
-        RPanUser rPanUser = rPanUserMapper.selectByUserId(userId);
+    private RPanUser checkOldPasswordAndGet(Long userId, String password) {
+        RPanUser rPanUser = rPanUserMapper.selectByPrimaryKey(userId);
         if (!Objects.equals(rPanUser.getPassword(), PasswordUtil.encryptPassword(rPanUser.getSalt(), password))) {
             throw new RPanException("旧密码不正确");
         }
@@ -323,14 +341,14 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
-     * 更换用户密码
+     * 修改用户密码
      *
      * @param rPanUser
      * @param newPassword
      */
     private void doChangePassword(RPanUser rPanUser, String newPassword) {
-        rPanUser.setPassword(PasswordUtil.encryptPassword(rPanUser.getSalt(), newPassword))
-                .setUpdateTime(new Date());
+        rPanUser.setPassword(PasswordUtil.encryptPassword(rPanUser.getSalt(), newPassword));
+        rPanUser.setUpdateTime(new Date());
         if (rPanUserMapper.updateByPrimaryKeySelective(rPanUser) != CommonConstant.ONE_INT) {
             throw new RPanException("修改密码失败");
         }

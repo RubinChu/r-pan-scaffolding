@@ -1,16 +1,11 @@
 package com.rubin.rpan.common.constant;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * 公用常量类
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 public class CommonConstant {
 
-    public static final String NULL_STR = "null";
-    public static final String SLASH_STR = "/";
     public static final String UTF_8_STR = "UTF-8";
     public static final String COMMON_SEPARATOR = "__,__";
     public static final String EMPTY_STR = "";
@@ -23,7 +18,6 @@ public class CommonConstant {
     public static final Integer ONE_INT = 1;
     public static final Integer TWO_INT = 2;
     public static final Integer MINUS_ONE_INT = -1;
-    public static final String TOP_STR = "TOP";
     public static final String TRUE_STR = "true";
 
     public static final Long ONE_DAY_LONG = 24L * 60L * 60L * 1000L;
@@ -53,8 +47,6 @@ public class CommonConstant {
     /**
      * 跨域设置枚举类
      */
-    @AllArgsConstructor
-    @Getter
     public enum CorsConfigEnum {
         /**
          * 允许所有远程访问
@@ -76,8 +68,22 @@ public class CommonConstant {
          * 允许所有请求头
          */
         CORS_HEADERS("Access-Control-Allow-Headers", "*");
+
+        CorsConfigEnum(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
         private String key;
         private String value;
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 
 }

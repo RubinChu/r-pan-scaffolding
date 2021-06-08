@@ -1,20 +1,18 @@
 package com.rubin.rpan.common.aspect;
 
-import com.rubin.rpan.common.annotation.NeedLogin;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.response.R;
 import com.rubin.rpan.common.response.ResponseCode;
 import com.rubin.rpan.common.util.JwtUtil;
 import com.rubin.rpan.common.util.RedisUtil;
 import com.rubin.rpan.common.util.UserIdUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -22,7 +20,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * 请求登录验证
@@ -30,13 +28,14 @@ import java.lang.reflect.Method;
  */
 @Aspect
 @Component
-@Slf4j
 public class RPanLoginAspect {
+
+    private static final Logger log = LoggerFactory.getLogger(RPanLoginAspect.class);
 
     /**
      * 登录认证参数名称
      */
-    private static final String LOGIN_AUTHENTICATION_PARAM_NAME = "token";
+    private static final String LOGIN_AUTHENTICATION_PARAM_NAME = "authorization";
 
     /**
      * 请求头token的key
@@ -46,7 +45,7 @@ public class RPanLoginAspect {
     /**
      * 切点入口
      */
-    private final String POINT_CUT = "execution(* com.rubin.rpan.modules.*.controller..*(..))";
+    private final String POINT_CUT = "@annotation(com.rubin.rpan.common.annotation.NeedLogin)";
 
     @Autowired
     @Qualifier(value = "redisUtil")
@@ -61,17 +60,15 @@ public class RPanLoginAspect {
 
     @Around("loginAuth()")
     public Object loginAuth(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        if (checkNeedLogin(proceedingJoinPoint)) {
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            HttpServletRequest request = servletRequestAttributes.getRequest();
-            String uri = request.getRequestURI();
-            log.debug("成功拦截到请求,uri为:{}", uri);
-            if (!checkAndSaveUserId(request)) {
-                log.warn("成功拦截到请求,uri为:{}, 检测到用户未登录,将跳转至登录页面", uri);
-                return R.fail(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
-            }
-            log.debug("成功拦截到请求,uri为:{}, 请求通过", uri);
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        String uri = request.getRequestURI();
+        log.debug("成功拦截到请求,uri为:{}", uri);
+        if (!checkAndSaveUserId(request)) {
+            log.warn("成功拦截到请求,uri为:{}, 检测到用户未登录,将跳转至登录页面", uri);
+            return R.fail(ResponseCode.NEED_LOGIN.getCode(), ResponseCode.NEED_LOGIN.getDesc());
         }
+        log.debug("成功拦截到请求,uri为:{}, 请求通过", uri);
         return proceedingJoinPoint.proceed();
     }
 
@@ -90,15 +87,15 @@ public class RPanLoginAspect {
         if (StringUtils.isEmpty(token)) {
             return false;
         }
-        String userId = JwtUtil.analyzeToken(token, CommonConstant.LOGIN_USER_ID);
-        if (StringUtils.isEmpty(userId)) {
+        Object userId = JwtUtil.analyzeToken(token, CommonConstant.LOGIN_USER_ID);
+        if (Objects.isNull(userId)) {
             return false;
         }
-        String redisValue = redisUtil.getString(CommonConstant.USER_LOGIN_PREFIX + userId);
-        if (StringUtils.isEmpty(redisValue)) {
+        Object redisValue = redisUtil.get(CommonConstant.USER_LOGIN_PREFIX + userId);
+        if (Objects.isNull(redisValue)) {
             return false;
         }
-        if (StringUtils.equals(redisValue, token)) {
+        if (Objects.equals(redisValue, token)) {
             saveUserId(userId);
             return true;
         }
@@ -110,21 +107,8 @@ public class RPanLoginAspect {
      *
      * @param userId
      */
-    private void saveUserId(String userId) {
-        UserIdUtil.set(userId);
-    }
-
-    /**
-     * 校验是否需要登录
-     *
-     * @param proceedingJoinPoint
-     * @return
-     */
-    private boolean checkNeedLogin(ProceedingJoinPoint proceedingJoinPoint) {
-        Signature signature = proceedingJoinPoint.getSignature();
-        MethodSignature methodSignature = (MethodSignature) signature;
-        Method targetMethod = methodSignature.getMethod();
-        return targetMethod.isAnnotationPresent(NeedLogin.class);
+    private void saveUserId(Object userId) {
+        UserIdUtil.set(Long.valueOf(String.valueOf(userId)));
     }
 
 }

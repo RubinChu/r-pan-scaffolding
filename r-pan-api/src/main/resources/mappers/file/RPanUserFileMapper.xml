@@ -2,60 +2,56 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rubin.rpan.modules.file.dao.RPanUserFileMapper">
     <resultMap id="BaseResultMap" type="com.rubin.rpan.modules.file.entity.RPanUserFile">
-        <id column="id" jdbcType="INTEGER" property="id"/>
-        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
-        <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
-        <result column="file_id" jdbcType="VARCHAR" property="fileId"/>
-        <result column="real_file_id" jdbcType="VARCHAR" property="realFileId"/>
-        <result column="filename" jdbcType="VARCHAR" property="filename"/>
-        <result column="folder_flag" jdbcType="INTEGER" property="folderFlag"/>
-        <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="del_flag" jdbcType="INTEGER" property="delFlag"/>
-        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <id column="file_id" jdbcType="BIGINT" property="fileId" />
+        <result column="user_id" jdbcType="BIGINT" property="userId" />
+        <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+        <result column="real_file_id" jdbcType="BIGINT" property="realFileId" />
+        <result column="filename" jdbcType="VARCHAR" property="filename" />
+        <result column="folder_flag" jdbcType="BIT" property="folderFlag" />
+        <result column="file_size_desc" jdbcType="VARCHAR" property="fileSizeDesc" />
+        <result column="file_type" jdbcType="BIT" property="fileType" />
+        <result column="del_flag" jdbcType="BIT" property="delFlag" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     </resultMap>
     <sql id="Base_Column_List">
-        id, user_id, parent_id, file_id, real_file_id, filename, folder_flag, type, del_flag,
-    create_user, create_time, update_user, update_time
+        file_id, user_id, parent_id, real_file_id, filename, folder_flag, file_size_desc, file_type, del_flag, create_user, create_time, update_user, update_time
     </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List"/>
-        from r_pan.r_pan_user_file
-        where id = #{id,jdbcType=INTEGER}
+            <include refid="Base_Column_List"/>
+        from r_pan_user_file
+        where file_id = #{fileId,jdbcType=BIGINT}
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-        delete from r_pan.r_pan_user_file
-        where id = #{id,jdbcType=INTEGER}
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from r_pan_user_file
+        where file_id = #{id,jdbcType=BIGINT}
     </delete>
     <insert id="insert" parameterType="com.rubin.rpan.modules.file.entity.RPanUserFile">
-        insert into r_pan.r_pan_user_file (user_id, parent_id,
-          file_id, real_file_id, filename,
-          folder_flag, type, del_flag,
+        insert into r_pan_user_file (file_id, user_id, parent_id,
+          real_file_id, filename, folder_flag,
+          file_size_desc, file_type, del_flag,
           create_user, create_time, update_user,
           update_time)
-        values (#{userId,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR},
-          #{fileId,jdbcType=VARCHAR}, #{realFileId,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR},
-          #{folderFlag,jdbcType=BIT}, #{type,jdbcType=INTEGER}, #{delFlag,jdbcType=BIT},
-          #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateUser,jdbcType=VARCHAR},
+        values (#{fileId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{parentId,jdbcType=BIGINT},
+          #{realFileId,jdbcType=BIGINT}, #{filename,jdbcType=VARCHAR}, #{folderFlag,jdbcType=BIT},
+          #{fileSizeDesc,jdbcType=VARCHAR}, #{fileType,jdbcType=BIT}, #{delFlag,jdbcType=BIT},
+          #{createUser,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateUser,jdbcType=BIGINT},
           #{updateTime,jdbcType=TIMESTAMP})
     </insert>
     <insert id="insertSelective" parameterType="com.rubin.rpan.modules.file.entity.RPanUserFile">
-        insert into r_pan.r_pan_user_file
+        insert into r_pan_user_file
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
+            <if test="fileId != null">
+                file_id,
             </if>
             <if test="userId != null">
                 user_id,
             </if>
             <if test="parentId != null">
                 parent_id,
-            </if>
-            <if test="fileId != null">
-                file_id,
             </if>
             <if test="realFileId != null">
                 real_file_id,
@@ -66,8 +62,11 @@
             <if test="folderFlag != null">
                 folder_flag,
             </if>
-            <if test="type != null">
-                type,
+            <if test="fileSizeDesc != null">
+                file_size_desc,
+            </if>
+            <if test="fileType != null">
+                file_type,
             </if>
             <if test="delFlag != null">
                 del_flag,
@@ -86,20 +85,17 @@
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=INTEGER},
+            <if test="fileId != null">
+                #{fileId,jdbcType=BIGINT},
             </if>
             <if test="userId != null">
-                #{userId,jdbcType=VARCHAR},
+                #{userId,jdbcType=BIGINT},
             </if>
             <if test="parentId != null">
-                #{parentId,jdbcType=VARCHAR},
-            </if>
-            <if test="fileId != null">
-                #{fileId,jdbcType=VARCHAR},
+                #{parentId,jdbcType=BIGINT},
             </if>
             <if test="realFileId != null">
-                #{realFileId,jdbcType=VARCHAR},
+                #{realFileId,jdbcType=BIGINT},
             </if>
             <if test="filename != null">
                 #{filename,jdbcType=VARCHAR},
@@ -107,20 +103,23 @@
             <if test="folderFlag != null">
                 #{folderFlag,jdbcType=BIT},
             </if>
-            <if test="type != null">
-                #{type,jdbcType=INTEGER},
+            <if test="fileSizeDesc != null">
+                #{fileSizeDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="fileType != null">
+                #{fileType,jdbcType=BIT},
             </if>
             <if test="delFlag != null">
                 #{delFlag,jdbcType=BIT},
             </if>
             <if test="createUser != null">
-                #{createUser,jdbcType=VARCHAR},
+                #{createUser,jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
             </if>
             <if test="updateUser != null">
-                #{updateUser,jdbcType=VARCHAR},
+                #{updateUser,jdbcType=BIGINT},
             </if>
             <if test="updateTime != null">
                 #{updateTime,jdbcType=TIMESTAMP},
@@ -128,19 +127,16 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.rubin.rpan.modules.file.entity.RPanUserFile">
-        update r_pan.r_pan_user_file
+        update r_pan_user_file
         <set>
             <if test="userId != null">
-                user_id = #{userId,jdbcType=VARCHAR},
+                user_id = #{userId,jdbcType=BIGINT},
             </if>
             <if test="parentId != null">
-                parent_id = #{parentId,jdbcType=VARCHAR},
-            </if>
-            <if test="fileId != null">
-                file_id = #{fileId,jdbcType=VARCHAR},
+                parent_id = #{parentId,jdbcType=BIGINT},
             </if>
             <if test="realFileId != null">
-                real_file_id = #{realFileId,jdbcType=VARCHAR},
+                real_file_id = #{realFileId,jdbcType=BIGINT},
             </if>
             <if test="filename != null">
                 filename = #{filename,jdbcType=VARCHAR},
@@ -148,149 +144,130 @@
             <if test="folderFlag != null">
                 folder_flag = #{folderFlag,jdbcType=BIT},
             </if>
-            <if test="type != null">
-                type = #{type,jdbcType=INTEGER},
+            <if test="fileSizeDesc != null">
+                file_size_desc = #{fileSizeDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="fileType != null">
+                file_type = #{fileType,jdbcType=BIT},
             </if>
             <if test="delFlag != null">
                 del_flag = #{delFlag,jdbcType=BIT},
             </if>
             <if test="createUser != null">
-                create_user = #{createUser,jdbcType=VARCHAR},
+                create_user = #{createUser,jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime,jdbcType=TIMESTAMP},
             </if>
             <if test="updateUser != null">
-                update_user = #{updateUser,jdbcType=VARCHAR},
+                update_user = #{updateUser,jdbcType=BIGINT},
             </if>
             <if test="updateTime != null">
                 update_time = #{updateTime,jdbcType=TIMESTAMP},
             </if>
         </set>
-        where id = #{id,jdbcType=INTEGER}
+        where file_id = #{fileId,jdbcType=BIGINT}
     </update>
+
     <update id="updateByPrimaryKey" parameterType="com.rubin.rpan.modules.file.entity.RPanUserFile">
-        update r_pan.r_pan_user_file
-        set user_id = #{userId,jdbcType=VARCHAR},
-          parent_id = #{parentId,jdbcType=VARCHAR},
-          file_id = #{fileId,jdbcType=VARCHAR},
-          real_file_id = #{realFileId,jdbcType=VARCHAR},
+        update r_pan_user_file
+        set user_id = #{userId,jdbcType=BIGINT},
+          parent_id = #{parentId,jdbcType=BIGINT},
+          real_file_id = #{realFileId,jdbcType=BIGINT},
           filename = #{filename,jdbcType=VARCHAR},
           folder_flag = #{folderFlag,jdbcType=BIT},
-          type = #{type,jdbcType=INTEGER},
+          file_size_desc = #{fileSizeDesc,jdbcType=VARCHAR},
+          file_type = #{file_type,jdbcType=BIT},
           del_flag = #{delFlag,jdbcType=BIT},
-          create_user = #{createUser,jdbcType=VARCHAR},
+          create_user = #{createUser,jdbcType=BIGINT},
           create_time = #{createTime,jdbcType=TIMESTAMP},
-          update_user = #{updateUser,jdbcType=VARCHAR},
+          update_user = #{updateUser,jdbcType=BIGINT},
           update_time = #{updateTime,jdbcType=TIMESTAMP}
-        where id = #{id,jdbcType=INTEGER}
-      </update>
+        where file_id = #{fileId,jdbcType=BIGINT}
+    </update>
 
     <!--===================================================================自定义===================================================================-->
 
-    <select id="selectByUserIdAndFileTypeAndParentIdAndDelFlag" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
+    <select id="selectRPanUserFileVOListByUserIdAndFileTypeAndParentIdAndDelFlag" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
         SELECT
-            rpuf.file_id AS fileId,
-            rpuf.parent_id AS parentId,
-            rpuf.filename AS filename,
-            rpuf.folder_flag AS folderFlag,
-            rpf.file_size_desc AS fileSizeDesc,
-            rpuf.type AS type,
-            rpuf.create_time AS createTime,
-            rpuf.update_time AS updateTime
+            file_id AS fileId,
+            parent_id AS parentId,
+            filename AS filename,
+            folder_flag AS folderFlag,
+            file_size_desc AS fileSizeDesc,
+            file_type AS fileType,
+            create_time AS createTime,
+            update_time AS updateTime
         FROM
-            r_pan.r_pan_user_file rpuf
-        LEFT JOIN r_pan.r_pan_file rpf ON rpuf.real_file_id = rpf.file_id
+            r_pan_user_file
         WHERE
-            rpuf.user_id = #{userId}
-        <if test="parentId != null and parentId != '-1'">
-            AND rpuf.parent_id = #{parentId}
-        </if>
-        <if test="fileTypeArray != null">
-            AND rpuf.type IN
-            <foreach collection="fileTypeArray" open="(" close=")" item="item" separator=",">
-                #{item}
-            </foreach>
-        </if>
-        AND rpuf.del_flag = #{delFlag}
-    </select>
-
-    <select id="selectByFileId" resultMap="BaseResultMap">
-        SELECT
-            <include refid="Base_Column_List"/>
-        FROM
-            r_pan.r_pan_user_file
-        WHERE
-            file_id = #{fileId}
-        AND del_flag = 0
+            user_id = #{userId}
+            <if test="parentId != null and parentId != -1">
+                AND parent_id = #{parentId}
+            </if>
+            <if test="fileTypeArray != null">
+                AND file_type IN
+                <foreach collection="fileTypeArray" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            AND del_flag = #{delFlag}
     </select>
 
     <select id="selectByFileIdAndUserId" resultMap="BaseResultMap">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
-            file_id = #{fileId}
-        AND user_id = #{userId}
-        AND del_flag = 0
+            user_id = #{userId}
+            AND file_id = #{fileId}
+            AND del_flag = 0
     </select>
 
     <select id="selectCountByUserIdAndFilenameAndParentId" resultType="int">
         SELECT
             COUNT(1)
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             user_id = #{userId}
-        AND filename = #{filename}
-        AND parent_id = #{parentId}
-        AND del_flag = 0
+            AND del_flag = 0
+            AND parent_id = #{parentId}
+            AND filename = #{filename}
     </select>
 
     <update id="deleteBatch">
         UPDATE
-            r_pan.r_pan_user_file
+            r_pan_user_file
         SET
             del_flag = 1,
-            update_user = create_user,
+            update_user = #{userId},
             update_time = NOW()
         WHERE
             file_id IN
             <foreach collection="idList" open="(" close=")" item="item" separator=",">
                 #{item}
             </foreach>
-        AND user_id = #{userId}
+            AND user_id = #{userId}
     </update>
-
-    <select id="selectRPanFileDownloadBOByFileId" resultType="com.rubin.rpan.modules.file.bo.RPanFileDownloadBO">
-        SELECT
-            rpuf.filename AS filename,
-            rpf.real_path AS realPath
-        FROM
-            r_pan.r_pan_user_file rpuf , r_pan.r_pan_file rpf
-        WHERE
-            rpuf.real_file_id = rpf.file_id
-        AND rpuf.file_id = #{fileId}
-        AND rpuf.del_flag = 0
-    </select>
 
     <select id="selectFolderListByUserId" resultMap="BaseResultMap">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             user_id = #{userId}
-        AND del_flag = 0
-        AND folder_flag = 1
+            AND del_flag = 0
+            AND folder_flag = 1
     </select>
 
     <select id="selectListByFileIdList" resultMap="BaseResultMap">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             file_id IN
             <foreach collection="idList" open="(" close=")" item="item" separator=",">
@@ -299,8 +276,7 @@
     </select>
 
     <insert id="insertBatch" parameterType="list">
-        INSERT INTO r_pan.r_pan_user_file (user_id, parent_id, file_id, real_file_id, filename, folder_flag, type, del_flag,
-        create_user, create_time, update_user, update_time)
+        INSERT INTO r_pan_user_file (user_id, parent_id, file_id, real_file_id, filename, folder_flag, file_type, del_flag, create_user, create_time, update_user, update_time)
         VALUES
         <foreach collection="recordList" item="item" separator=",">
             (
@@ -310,7 +286,7 @@
             #{item.realFileId},
             #{item.filename},
             #{item.folderFlag},
-            #{item.type},
+            #{item.fileType},
             #{item.delFlag},
             #{item.createUser},
             #{item.createTime},
@@ -323,65 +299,51 @@
 
     <select id="selectRPanUserFileVOListByUserIdAndFilenameAndFileTypes" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
         SELECT
-            rpuf.file_id AS fileId,
-            rpuf.parent_id AS parentId,
-            rpuf.filename AS filename,
-            rpuf.folder_flag AS folderFlag,
-            rpf.file_size_desc AS fileSizeDesc,
-            rpuf.type AS type,
-            rpuf.create_time AS createTime,
-            rpuf.update_time AS updateTime
+            file_id AS fileId,
+            parent_id AS parentId,
+            filename AS filename,
+            folder_flag AS folderFlag,
+            file_size_desc AS fileSizeDesc,
+            file_type AS fileType,
+            create_time AS createTime,
+            update_time AS updateTime
         FROM
-            r_pan.r_pan_user_file rpuf
-            LEFT JOIN r_pan.r_pan_file rpf ON rpuf.real_file_id = rpf.file_id
+            r_pan_user_file
         WHERE
-            rpuf.user_id = #{userId}
-        AND rpuf.filename LIKE CONCAT('%', #{keyword}, '%')
-        AND rpuf.del_flag = 0
-        <if test="fileTypeArray != null">
-            AND rpuf.type IN
-            <foreach collection="fileTypeArray" open="(" close=")" item="item" separator=",">
-                #{item}
-            </foreach>
-        </if>
+            user_id = #{userId}
+            AND del_flag = 0
+            AND filename LIKE CONCAT('%', #{keyword}, '%')
+            <if test="fileTypeArray != null">
+                AND file_type IN
+                <foreach collection="fileTypeArray" open="(" close=")" item="item" separator=",">
+                    #{item}
+                </foreach>
+            </if>
     </select>
 
     <select id="selectRPanUserFileVOByFileIdAndUserId" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
         SELECT
-            rpuf.file_id AS fileId,
-            rpuf.parent_id AS parentId,
-            rpuf.filename AS filename,
-            rpuf.folder_flag AS folderFlag,
-            rpf.file_size_desc AS fileSizeDesc,
-            rpuf.type AS type,
-            rpuf.create_time AS createTime,
-            rpuf.update_time AS updateTime
+            file_id AS fileId,
+            parent_id AS parentId,
+            filename AS filename,
+            folder_flag AS folderFlag,
+            file_size_desc AS fileSizeDesc,
+            file_type AS fileType,
+            create_time AS createTime,
+            update_time AS updateTime
         FROM
-            r_pan.r_pan_user_file rpuf
-            LEFT JOIN r_pan.r_pan_file rpf ON rpuf.real_file_id = rpf.file_id
+            r_pan_user_file
         WHERE
-            rpuf.file_id = #{fileId}
-        AND rpuf.user_id = #{userId}
-        AND rpuf.del_flag = 0
-    </select>
-
-    <select id="selectRPanFilePreviewBOByFileId" resultType="com.rubin.rpan.modules.file.bo.RPanFilePreviewBO">
-        SELECT
-            rpf.real_path AS realPath,
-            rpf.file_preview_content_type AS filePreviewContentType
-        FROM
-            r_pan.r_pan_user_file rpuf , r_pan.r_pan_file rpf
-        WHERE
-            rpuf.real_file_id = rpf.file_id
-        AND rpuf.file_id = #{fileId}
-        AND rpuf.del_flag = 0
+            file_id = #{fileId}
+            AND user_id = #{userId}
+            AND del_flag = 0
     </select>
 
     <select id="selectAllListByParentId" resultMap="BaseResultMap">
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             parent_id = #{parentId}
     </select>
@@ -390,47 +352,46 @@
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             parent_id = #{parentId}
-        AND del_flag = 0
+            AND del_flag = 0
     </select>
 
     <select id="selectAvailableRPanUserFileVOListByParentId" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
         SELECT
-            rpuf.file_id AS fileId,
-            rpuf.parent_id AS parentId,
-            rpuf.filename AS filename,
-            rpuf.folder_flag AS folderFlag,
-            rpf.file_size_desc AS fileSizeDesc,
-            rpuf.type AS type,
-            rpuf.create_time AS createTime,
-            rpuf.update_time AS updateTime
+            file_id AS fileId,
+            parent_id AS parentId,
+            filename AS filename,
+            folder_flag AS folderFlag,
+            file_size_desc AS fileSizeDesc,
+            file_type AS fileType,
+            create_time AS createTime,
+            update_time AS updateTime
         FROM
-            r_pan.r_pan_user_file rpuf
-                LEFT JOIN r_pan.r_pan_file rpf ON rpuf.real_file_id = rpf.file_id
+            r_pan_user_file
         WHERE
-            rpuf.parent_id = #{parentId}
-        AND rpuf.del_flag = 0
+            parent_id = #{parentId}
+            AND del_flag = 0
     </select>
 
     <update id="updateUserFileDelFlagByFileIdListAndUserId">
         UPDATE
-            r_pan.r_pan_user_file
+            r_pan_user_file
         SET
             del_flag = 0,
             update_user = #{userId},
             update_time = NOW()
         WHERE
             user_id = #{userId}
-        AND file_id IN
-        <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
-            #{item}
-        </foreach>
+            AND file_id IN
+            <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
     </update>
 
     <delete id="physicalDeleteBatch">
-        DELETE FROM r_pan.r_pan_user_file WHERE user_id = #{userId} AND file_id IN
+        DELETE FROM r_pan_user_file WHERE user_id = #{userId} AND file_id IN
         <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
             #{item}
         </foreach>
@@ -440,30 +401,51 @@
         SELECT
             COUNT(1)
         FROM
-            r_pan.r_pan_user_file
+            r_pan_user_file
         WHERE
             real_file_id = #{realFileId}
     </select>
 
     <select id="selectRPanUserFileVOListByFileIdList" resultType="com.rubin.rpan.modules.file.vo.RPanUserFileVO">
         SELECT
-            rpuf.file_id AS fileId,
-            rpuf.parent_id AS parentId,
-            rpuf.filename AS filename,
-            rpuf.folder_flag AS folderFlag,
-            rpf.file_size_desc AS fileSizeDesc,
-            rpuf.type AS type,
-            rpuf.create_time AS createTime,
-            rpuf.update_time AS updateTime
+            file_id AS fileId,
+            parent_id AS parentId,
+            filename AS filename,
+            folder_flag AS folderFlag,
+            file_size_desc AS fileSizeDesc,
+            file_type AS fileType,
+            create_time AS createTime,
+            update_time AS updateTime
         FROM
-            r_pan.r_pan_user_file rpuf
-        LEFT JOIN r_pan.r_pan_file rpf ON rpuf.real_file_id = rpf.file_id
+            r_pan_user_file
         WHERE
-            rpuf.del_flag = 0
-        AND rpuf.file_id IN
-        <foreach collection="fileIdList" item="item" separator="," open="(" close=")">
-            #{item}
-        </foreach>
+            del_flag = 0
+            AND file_id IN
+            <foreach collection="fileIdList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="selectTopFolderByUserId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM
+            r_pan_user_file
+        WHERE
+            user_id = #{userId}
+            AND del_flag = 0
+            AND parent_id = 0
+            AND folder_flag = 1
+    </select>
+
+    <select id="selectAvailableFileIdListByParentId" resultType="java.lang.Long">
+        SELECT
+            file_id
+        FROM
+            r_pan_user_file
+        WHERE
+            parent_id = #{parentId}
+        AND del_flag = 0
     </select>
 
 </mapper>

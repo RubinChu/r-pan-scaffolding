@@ -51,7 +51,7 @@ public class FileRestController {
     )
     @GetMapping("files")
     @NeedLogin
-    public R<List<RPanUserFileVO>> list(@NotBlank(message = "父id不能为空") @RequestParam(value = "parentId", required = false) String parentId,
+    public R<List<RPanUserFileVO>> list(@NotNull(message = "父id不能为空") @RequestParam(value = "parentId", required = false) Long parentId,
                                         @RequestParam(name = "fileTypes", required = false, defaultValue = "-1") String fileTypes) {
         return R.data(iUserFileService.list(parentId, fileTypes, UserIdUtil.get()));
     }
@@ -127,7 +127,7 @@ public class FileRestController {
     @NeedLogin
     @LogIgnore
     public R<List<RPanUserFileVO>> upload(@NotNull(message = "上传文件不能为空") @RequestParam(value = "file", required = false) MultipartFile file,
-                                          @NotBlank(message = "父id不能为空") @RequestParam(value = "parentId", required = false) String parentId) {
+                                          @NotNull(message = "父id不能为空") @RequestParam(value = "parentId", required = false) Long parentId) {
         return R.data(iUserFileService.upload(file, parentId, UserIdUtil.get()));
     }
 
@@ -146,7 +146,7 @@ public class FileRestController {
     @GetMapping("file/download")
     @NeedLogin
     @LogIgnore
-    public void download(@NotBlank(message = "请选择要下载的文件") @RequestParam(value = "fileId", required = false) String fileId,
+    public void download(@NotNull(message = "请选择要下载的文件") @RequestParam(value = "fileId", required = false) Long fileId,
                          HttpServletResponse response) {
         iUserFileService.download(fileId, response, UserIdUtil.get());
     }
@@ -238,7 +238,7 @@ public class FileRestController {
     )
     @GetMapping("file")
     @NeedLogin
-    public R<RPanUserFileVO> detail(@NotBlank(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) String fileId) {
+    public R<RPanUserFileVO> detail(@NotNull(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) Long fileId) {
         return R.data(iUserFileService.detail(fileId, UserIdUtil.get()));
     }
 
@@ -255,7 +255,7 @@ public class FileRestController {
     )
     @GetMapping("file/breadcrumbs")
     @NeedLogin
-    public R<List<BreadcrumbVO>> getBreadcrumbs(@NotBlank(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) String fileId) {
+    public R<List<BreadcrumbVO>> getBreadcrumbs(@NotNull(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) Long fileId) {
         return R.data(iUserFileService.getBreadcrumbs(fileId, UserIdUtil.get()));
     }
 
@@ -274,7 +274,7 @@ public class FileRestController {
     @GetMapping("preview")
     @NeedLogin
     @LogIgnore
-    public void preview(@NotBlank(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) String fileId,
+    public void preview(@NotNull(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) Long fileId,
                         HttpServletResponse response) {
         iUserFileService.preview(fileId, response, UserIdUtil.get());
     }

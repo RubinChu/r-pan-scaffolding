@@ -3,7 +3,6 @@ package com.rubin.rpan.common.response;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -13,7 +12,6 @@ import java.io.Serializable;
  */
 // 保证json序列化的时候，如果value为null的时候，key也会消失
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
 public class R<T> implements Serializable {
     private int status;
     private String message;
@@ -72,6 +70,18 @@ public class R<T> implements Serializable {
 
     public static <T> R<T> fail(int error_code, String error_message) {
         return new R<T>(error_code, error_message);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
     }
 
 }

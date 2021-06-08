@@ -2,6 +2,8 @@ package com.rubin.rpan.modules.share;
 
 import com.rubin.rpan.RPanApplication;
 import com.rubin.rpan.common.constant.CommonConstant;
+import com.rubin.rpan.common.util.IdGenerator;
+import com.rubin.rpan.common.util.StringListUtil;
 import com.rubin.rpan.modules.file.service.IUserFileService;
 import com.rubin.rpan.modules.file.vo.RPanUserFileVO;
 import com.rubin.rpan.modules.share.constant.ShareConstant;
@@ -49,13 +51,17 @@ public class ShareFileServiceTest {
     @Qualifier(value = "userService")
     private IUserService iUserService;
 
+    @Autowired
+    @Qualifier(value = "idGenerator")
+    private IdGenerator idGenerator;
+
     /**
      * 测试批量保存分享文件信息成功
      */
     @Test
     @Rollback
     public void saveBatchSuccessTest() {
-        iShareFileService.saveBatch("test-share-id", "file-id-1__,__file-id-2", "test-user-id");
+        iShareFileService.saveBatch(idGenerator.nextId(), "1__,__2", idGenerator.nextId());
     }
 
     /**
@@ -64,9 +70,9 @@ public class ShareFileServiceTest {
     @Test
     @Rollback
     public void cancelShareFilesSuccessTest() {
-        String shareId = "test-share-id";
-        iShareFileService.saveBatch(shareId, "file-id-1__,__file-id-2", "test-user-id");
-        iShareFileService.cancelShareFiles(shareId);
+        Long shareId = idGenerator.nextId();
+        iShareFileService.saveBatch(shareId, "1__,__2", idGenerator.nextId());
+        iShareFileService.cancelShareFiles(StringListUtil.longListToString(shareId));
     }
 
     /**
@@ -75,7 +81,7 @@ public class ShareFileServiceTest {
     @Test
     @Rollback
     public void getShareFileInfosSuccessTest() {
-        String userId = register();
+        Long userId = register();
         List<RPanUserFileVO> rPanUserFileVOList = createFolder(userId);
         String fileIds = StringUtils.join(rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList()), CommonConstant.COMMON_SEPARATOR);
         RPanUserShareUrlVO rPanUserShareUrlVO = iShareService.create("test-share-name",
@@ -94,7 +100,7 @@ public class ShareFileServiceTest {
     @Test
     @Rollback
     public void getShareIdByFileIdsSuccessTest() {
-        String userId = register();
+        Long userId = register();
         List<RPanUserFileVO> rPanUserFileVOList = createFolder(userId);
         String fileIds = StringUtils.join(rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList()), CommonConstant.COMMON_SEPARATOR);
         RPanUserShareUrlVO rPanUserShareUrlVO = iShareService.create("test-share-name",
@@ -103,7 +109,7 @@ public class ShareFileServiceTest {
                 fileIds,
                 userId);
         Assert.assertNotNull(rPanUserShareUrlVO);
-        List<String> shareIdList = iShareFileService.getShareIdByFileIds(fileIds);
+        List<Long> shareIdList = iShareFileService.getShareIdByFileIds(fileIds);
         Assert.assertEquals(1, shareIdList.size());
     }
 
@@ -113,7 +119,7 @@ public class ShareFileServiceTest {
     @Test
     @Rollback
     public void getAllShareFileInfosSuccessTest() {
-        String userId = register();
+        Long userId = register();
         List<RPanUserFileVO> rPanUserFileVOList = createFolder(userId);
         String fileIds = StringUtils.join(rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList()), CommonConstant.COMMON_SEPARATOR);
         RPanUserShareUrlVO rPanUserShareUrlVO = iShareService.create("test-share-name",
@@ -126,6 +132,25 @@ public class ShareFileServiceTest {
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
 
+    /**
+     * 测试获取分享的文件列表成功
+     */
+    @Test
+    @Rollback
+    public void getShareFileIdsSuccessTest() {
+        Long userId = register();
+        List<RPanUserFileVO> rPanUserFileVOList = createFolder(userId);
+        String fileIds = StringUtils.join(rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList()), CommonConstant.COMMON_SEPARATOR);
+        RPanUserShareUrlVO rPanUserShareUrlVO = iShareService.create("test-share-name",
+                ShareConstant.ShareType.NEED_SHARE_CODE.getCode(),
+                ShareConstant.ShareDayType.PERMANENT_VALIDITY.getCode(),
+                fileIds,
+                userId);
+        Assert.assertNotNull(rPanUserShareUrlVO);
+        List<Long> fileIdsByShareId = iShareFileService.getFileIdsByShareId(rPanUserShareUrlVO.getShareId());
+        Assert.assertEquals(1, fileIdsByShareId.size());
+    }
+
     /********************************************************************************私有********************************************************************************/
 
     /**
@@ -133,7 +158,7 @@ public class ShareFileServiceTest {
      *
      * @return
      */
-    private String register() {
+    private Long register() {
         return register("test-username");
     }
 
@@ -143,10 +168,10 @@ public class ShareFileServiceTest {
      * @param username
      * @return
      */
-    private String register(String username) {
+    private Long register(String username) {
         String userId = iUserService.register(username, "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        return userId;
+        return Long.valueOf(userId);
     }
 
     /**
@@ -155,7 +180,7 @@ public class ShareFileServiceTest {
      * @param userId
      * @return
      */
-    private RPanUserVO info(String userId) {
+    private RPanUserVO info(Long userId) {
         RPanUserVO rPanUserVO = iUserService.info(userId);
         Assert.assertNotNull(rPanUserVO);
         return rPanUserVO;
@@ -167,7 +192,7 @@ public class ShareFileServiceTest {
      * @param userId
      * @return
      */
-    private List<RPanUserFileVO> createFolder(String userId) {
+    private List<RPanUserFileVO> createFolder(Long userId) {
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());

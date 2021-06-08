@@ -13,7 +13,7 @@ public interface IUserService {
 
     String login(String username, String password);
 
-    RPanUserVO info(String userId);
+    RPanUserVO info(Long userId);
 
     String checkUsername(String username);
 
@@ -21,10 +21,10 @@ public interface IUserService {
 
     void resetPassword(String username, String newPassword, String token);
 
-    void changePassword(String password, String newPassword, String userId);
+    void changePassword(String password, String newPassword, Long userId);
 
-    void exit(String userId);
+    void exit(Long userId);
 
-    ShareUserInfoVO getShareUserInfo(String userId);
+    ShareUserInfoVO getShareUserInfo(Long userId);
 
 }

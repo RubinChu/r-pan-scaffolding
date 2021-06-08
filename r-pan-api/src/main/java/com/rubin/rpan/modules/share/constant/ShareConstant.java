@@ -1,8 +1,6 @@
 package com.rubin.rpan.modules.share.constant;
 
 import com.rubin.rpan.common.constant.CommonConstant;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.util.Objects;
 
@@ -15,19 +13,29 @@ public class ShareConstant {
     /**
      * 分享类型枚举类
      */
-    @AllArgsConstructor
-    @Getter
     public enum ShareType {
         NEED_SHARE_CODE(0, "有提取码");
+
+        ShareType(Integer code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
         private Integer code;
         private String name;
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
     /**
      * 分享天数枚举类
      */
-    @AllArgsConstructor
-    @Getter
     public enum ShareDayType {
         PERMANENT_VALIDITY(0, 0, "永久有效"),
         SEVEN_DAYS_VALIDITY(1, 7, "7天有效"),
@@ -35,6 +43,24 @@ public class ShareConstant {
         private Integer code;
         private Integer days;
         private String name;
+
+        ShareDayType(Integer code, Integer days, String name) {
+            this.code = code;
+            this.days = days;
+            this.name = name;
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public Integer getDays() {
+            return days;
+        }
+
+        public String getName() {
+            return name;
+        }
 
         public static Integer getDaysByCode(Integer code) {
             if (Objects.isNull(code)) {
@@ -52,13 +78,25 @@ public class ShareConstant {
     /**
      * 分享状态枚举类
      */
-    @AllArgsConstructor
-    @Getter
     public enum ShareStatus {
         NORMAL(0, "正常"),
         FILE_DELETED(1, "有文件被删除");
+
+        ShareStatus(Integer code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
         private Integer code;
         private String name;
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
 }

@@ -4,18 +4,18 @@
 Source scaffolding for a personal file management system,[r-pan](https://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal file system quickly.
 
 #### Version 
-v3.0
+v3.1
 
 #### Version Updates
-* Added Recycle Bin function
-* Share functionality was added
-* Preview functionality has been optimized. This version will not use Nginx as a static resource server, but will provide its own preview service(**Note: Office Preview must be published to the online environment, not the local environment**)
+* Bulk uploads have been added
+* Bulk download functionality has been added
+* Optimized table structure and query efficiency
 * Fixed some bugs
 
 #### Iterate directions for subsequent releases
 * Optimize your website UI
-* Optimize uploads, support multiple file uploads, breakpoint continuation and so on
-* Optimize download, support breakpoint to continue downloading
+* Optimize uploads, support breakpoint continuation, folder uploads, etc
+* Optimize download, support breakpoint continue download and folder packaging download and so on
 * Optimize sharing, add chat and friend system
 * Coming soon...
 

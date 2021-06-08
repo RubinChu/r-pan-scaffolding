@@ -13,13 +13,13 @@ import java.util.List;
 @Repository(value = "rPanShareFileMapper")
 public interface RPanShareFileMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long id);
 
     int insert(RPanShareFile record);
 
     int insertSelective(RPanShareFile record);
 
-    RPanShareFile selectByPrimaryKey(Integer id);
+    RPanShareFile selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(RPanShareFile record);
 
@@ -27,10 +27,10 @@ public interface RPanShareFileMapper {
 
     int insertBatch(@Param("rPanShareFileList") List<RPanShareFile> rPanShareFileList);
 
-    int deleteByShareIdList(@Param("shareIdList") List<String> shareIdList);
+    int deleteByShareIdList(@Param("shareIdList") List<Long> shareIdList);
 
-    List<String> selectFileIdsByShareId(@Param("shareId") String shareId);
+    List<Long> selectFileIdsByShareId(@Param("shareId") Long shareId);
 
-    List<String> selectShareIdByFileIds(@Param("fileIds") List<String> fileIds);
+    List<Long> selectShareIdByFileIds(@Param("fileIds") List<Long> fileIds);
 
 }

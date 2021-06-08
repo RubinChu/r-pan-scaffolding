@@ -8,10 +8,10 @@ spring:
       max-request-size: 3072MB
   datasource:
     # TODO Configure your database connection information
-    url: jdbc:mysql://mysql-address/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://<mysql-address>/r_pan?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: username
-    password: password
+    username: <username>
+    password: <password>
     platform: mysql
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -44,10 +44,11 @@ spring:
         login-password: admin
   redis:
     database: 1
-    # TODO Configure your redis address and auth
-    host: redis-host
+    # TODO Configure your redis address
+    host: <redis-host>
     port: 6379
-    password: auth-password
+    # TODO Configure your redis password
+    password: <auth-password>
     jedis:
       pool:
         max-active: 8
@@ -66,7 +67,7 @@ file:
     path: path
     # TODO The Share URI prefix
   share:
-    prefix: http://your-domain/share/
+    prefix: http://<your-portal-domain>/share/
 
 # swagger2
 swagger2:

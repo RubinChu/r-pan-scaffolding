@@ -13,26 +13,26 @@ import org.springframework.stereotype.Repository;
 @Repository(value = "rPanUserMapper")
 public interface RPanUserMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long userId);
 
     int insert(RPanUser record);
 
     int insertSelective(RPanUser record);
 
-    RPanUser selectByPrimaryKey(Integer id);
+    RPanUser selectByPrimaryKey(Long userId);
 
     int updateByPrimaryKeySelective(RPanUser record);
 
     int updateByPrimaryKey(RPanUser record);
 
-    RPanUser selectByUserName(@Param("username") String username);
-
-    RPanUserVO selectRPanUserVOByUserId(@Param("userId") String userId);
+    String selectQuestionByUsername(@Param("username") String username);
 
     int selectCountByUsernameAndQuestionAndAnswer(@Param("username") String username, @Param("question") String question, @Param("answer") String answer);
 
     RPanUser selectByUserId(@Param("userId") String userId);
 
-    ShareUserInfoVO selectShareUserInfoVOByUserId(@Param("userId") String userId);
+    ShareUserInfoVO selectShareUserInfoVOByUserId(@Param("userId") Long userId);
+
+    RPanUser selectByUsername(@Param("username") String username);
 
 }

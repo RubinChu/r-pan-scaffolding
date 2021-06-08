@@ -15,24 +15,24 @@ import java.util.List;
  */
 public interface IShareService {
 
-    RPanUserShareUrlVO create(String shareName, Integer shareType, Integer shareDayType, String shareFileIds, String userId);
+    RPanUserShareUrlVO create(String shareName, Integer shareType, Integer shareDayType, String shareFileIds, Long userId);
 
-    List<RPanUserShareUrlVO> list(String userId);
+    List<RPanUserShareUrlVO> list(Long userId);
 
-    void cancel(String shareIds, String userId);
+    void cancel(String shareIds, Long userId);
 
-    RPanUserShareDetailVO detail(String shareId);
+    RPanUserShareDetailVO detail(Long shareId);
 
-    RPanUserShareSimpleDetailVO simpleDetail(String shareId);
+    RPanUserShareSimpleDetailVO simpleDetail(Long shareId);
 
-    String checkShareCode(String shareId, String shareCode);
+    String checkShareCode(Long shareId, String shareCode);
 
-    void changeShareStatus(String fileIds, ShareConstant.ShareStatus shareStatus);
+    void refreshShareStatus(String fileIds);
 
-    List<RPanUserFileVO> fileList(String shareId, String parentId);
+    List<RPanUserFileVO> fileList(Long shareId, Long parentId);
 
-    void save(String shareId, String fileIds, String targetParentId, String userId);
+    void save(Long shareId, String fileIds, Long targetParentId, Long userId);
 
-    void download(String shareId, String fileId, HttpServletResponse response);
+    void download(Long shareId, Long fileId, HttpServletResponse response);
 
 }

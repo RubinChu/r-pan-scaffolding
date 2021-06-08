@@ -1,10 +1,14 @@
 package com.rubin.rpan.modules.file;
 
 import com.rubin.rpan.RPanApplication;
+import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
+import com.rubin.rpan.common.util.StringListUtil;
 import com.rubin.rpan.modules.file.entity.RPanFile;
 import com.rubin.rpan.modules.file.service.IFileService;
 import com.rubin.rpan.modules.user.service.IUserService;
+import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +47,7 @@ public class FileServiceTest {
     @Test
     @Rollback
     public void saveSuccessTest() {
-        String userId = register();
+        Long userId = register();
         Assert.assertNotNull(iFileService.save(generateMultipartFile(), userId));
     }
 
@@ -53,10 +57,10 @@ public class FileServiceTest {
     @Test
     @Rollback
     public void deleteSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanFile rPanFile = iFileService.save(generateMultipartFile(), userId);
         Assert.assertNotNull(rPanFile);
-        iFileService.delete(rPanFile.getFileId());
+        iFileService.delete(StringListUtil.longListToString(rPanFile.getFileId()));
     }
 
     /**
@@ -75,10 +79,10 @@ public class FileServiceTest {
      *
      * @return
      */
-    private String register() {
+    private Long register() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        return userId;
+        return Long.valueOf(userId);
     }
 
     /**

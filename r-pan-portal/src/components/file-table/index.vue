@@ -22,7 +22,7 @@
                     min-width="750">
                 <template slot-scope="scope">
                     <div @click="clickFilename(scope.row)" class="file-name-content">
-                        <i :class="getFileFontElement(scope.row.type)"
+                        <i :class="getFileFontElement(scope.row.fileType)"
                            style="margin-right: 15px; font-size: 20px; cursor: pointer;"/>
                         <span style="cursor:pointer;">{{ scope.row.filename }}</span>
                     </div>
@@ -120,7 +120,7 @@
             },
             clickFilename(row) {
                 let _this = this
-                switch (row.type) {
+                switch (row.fileType) {
                     case 0:
                         _this.goInFolder(row)
                         break

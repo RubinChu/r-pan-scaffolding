@@ -23,7 +23,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -122,7 +122,7 @@ public class ShareController {
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE
     )
     @GetMapping("share/simple")
-    public R<RPanUserShareSimpleDetailVO> simpleDetail(@NotBlank(message = "分享ID不能为空") @RequestParam(value = "shareId", required = false) String shareId) {
+    public R<RPanUserShareSimpleDetailVO> simpleDetail(@NotNull(message = "分享ID不能为空") @RequestParam(value = "shareId", required = false) Long shareId) {
         return R.data(iShareService.simpleDetail(shareId));
     }
 
@@ -157,7 +157,7 @@ public class ShareController {
     )
     @GetMapping("share/file/list")
     @NeedShareCode
-    public R<List<RPanUserFileVO>> fileList(@NotBlank(message = "父id不能为空") @RequestParam(value = "parentId", required = false) String parentId) {
+    public R<List<RPanUserFileVO>> fileList(@NotNull(message = "父id不能为空") @RequestParam(value = "parentId", required = false) Long parentId) {
         return R.data(iShareService.fileList(ShareIdUtil.get(), parentId));
     }
 
@@ -197,7 +197,7 @@ public class ShareController {
     @GetMapping("share/file/download")
     @NeedShareCode
     @NeedLogin
-    public void download(@NotBlank(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) String fileId,
+    public void download(@NotNull(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) Long fileId,
                          HttpServletResponse response) {
         iShareService.download(ShareIdUtil.get(), fileId, response);
     }

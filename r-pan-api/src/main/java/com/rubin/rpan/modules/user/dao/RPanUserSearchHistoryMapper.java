@@ -14,22 +14,20 @@ import java.util.List;
 @Repository(value = "rPanUserSearchHistoryMapper")
 public interface RPanUserSearchHistoryMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long id);
 
     int insert(RPanUserSearchHistory record);
 
     int insertSelective(RPanUserSearchHistory record);
 
-    RPanUserSearchHistory selectByPrimaryKey(Integer id);
+    RPanUserSearchHistory selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(RPanUserSearchHistory record);
 
     int updateByPrimaryKey(RPanUserSearchHistory record);
 
-    List<RPanUserSearchHistoryVO> selectRPanUserSearchHistoryVOListByUserId(@Param("userId") String userId);
+    List<RPanUserSearchHistoryVO> selectRPanUserSearchHistoryVOListByUserId(@Param("userId") Long userId);
 
-    RPanUserSearchHistory selectBySearchContentAndUserId(@Param("searchContent") String searchContent, @Param("userId") String userId);
-
-    int updateUpdateTimeBySearchContentAndUserId(@Param("searchContent") String searchContent, @Param("userId") String userId);
+    int updateUpdateTimeBySearchContentAndUserId(@Param("searchContent") String searchContent, @Param("userId") Long userId);
 
 }

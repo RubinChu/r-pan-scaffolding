@@ -1,11 +1,14 @@
 <template>
     <div>
         <div class="button-search-content">
-            <file-button-group :button-array="buttonArray" :parent-id="parentId" :multiple-selection="multipleSelection" @refresh="refresh"/>
+            <file-button-group :button-array="buttonArray" :parent-id="parentId" :multiple-selection="multipleSelection"
+                               @refresh="refresh"/>
             <search @refresh="searchList" :file-types="fileTypes"/>
         </div>
-        <bread-crumb :bread-crumbs="breadCrumbs" :normal="normal" :file-types="fileTypes" @refresh="refresh" @reload="reloadBreadCrumbs"/>
-        <file-table :table-data="tableData" :parent-id="parentId" :file-types="fileTypes" @refresh="refresh" @goInFolder="reloadBreadCrumbs" @handleSelectionChange="handleSelectionChange"/>
+        <bread-crumb :bread-crumbs="breadCrumbs" :normal="normal" :file-types="fileTypes" @refresh="refresh"
+                     @reload="reloadBreadCrumbs"/>
+        <file-table :table-data="tableData" :parent-id="parentId" :file-types="fileTypes" @refresh="refresh"
+                    @goInFolder="reloadBreadCrumbs" @handleSelectionChange="handleSelectionChange"/>
     </div>
 </template>
 
@@ -20,7 +23,7 @@
 
     export default {
         name: 'Files',
-        components: { FileButtonGroup, Search, BreadCrumb, FileTable },
+        components: {FileButtonGroup, Search, BreadCrumb, FileTable},
         props: [],
         data() {
             return {
@@ -46,12 +49,12 @@
                     _this.breadCrumbs.push(item)
                     _this.parentId = res.data.rootFileId
                     _this.defaultParentId = res.data.rootFileId
-                    _this.initTableData()
+                    _this.loadTableData()
                 }, res => {
                     _this.$message.error(res.message)
                 })
             },
-            initTableData() {
+            loadTableData() {
                 let _this = this
                 fileService.list({
                     parentId: _this.parentId,
@@ -63,7 +66,11 @@
                 })
             },
             refresh(fileList) {
-                this.tableData = fileList
+                if (fileList) {
+                    this.tableData = fileList
+                } else {
+                    this.loadTableData()
+                }
             },
             reloadBreadCrumbs(newBreadCrumbs) {
                 this.normal = true

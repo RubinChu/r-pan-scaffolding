@@ -2,7 +2,8 @@ package com.rubin.rpan.common.util;
 
 import com.google.common.collect.Maps;
 import com.rubin.rpan.common.constant.CommonConstant;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -17,8 +18,9 @@ import java.util.Properties;
  * 文件内容类型工具类
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@Slf4j
 public class FileContentTypeUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(FileContentTypeUtil.class);
 
     /**
      * 文件内容类型容器

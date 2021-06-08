@@ -3,6 +3,7 @@ package com.rubin.rpan.modules.recycle;
 import com.rubin.rpan.RPanApplication;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
+import com.rubin.rpan.common.util.StringListUtil;
 import com.rubin.rpan.modules.file.service.IUserFileService;
 import com.rubin.rpan.modules.file.vo.RPanUserFileVO;
 import com.rubin.rpan.modules.recycle.service.IRecycleBinService;
@@ -49,7 +50,7 @@ public class RecycleBinServiceTest {
     @Test
     @Rollback
     public void listSuccessTest() {
-        String userId = deleteFile();
+        Long userId = deleteFile();
         List<RPanUserFileVO> rPanUserFileVOList = iRecycleBinService.list(userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
@@ -60,11 +61,11 @@ public class RecycleBinServiceTest {
     @Test
     @Rollback
     public void restoreSuccessTest() {
-        String userId = deleteFile();
+        Long userId = deleteFile();
         List<RPanUserFileVO> rPanUserFileVOList = iRecycleBinService.list(userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
-        List<String> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
-        String fileIds = StringUtils.join(fileIdList.toArray(), CommonConstant.COMMON_SEPARATOR);
+        List<Long> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
+        String fileIds = StringListUtil.longListToString(fileIdList);
         rPanUserFileVOList = iRecycleBinService.restore(fileIds, userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
     }
@@ -75,11 +76,11 @@ public class RecycleBinServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void restoreSameNameFileFailTest() {
-        String userId = deleteSameNameFile();
+        Long userId = deleteSameNameFile();
         List<RPanUserFileVO> rPanUserFileVOList = iRecycleBinService.list(userId);
         Assert.assertEquals(2, rPanUserFileVOList.size());
-        List<String> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
-        String fileIds = StringUtils.join(fileIdList.toArray(), CommonConstant.COMMON_SEPARATOR);
+        List<Long> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
+        String fileIds = StringListUtil.longListToString(fileIdList);
         iRecycleBinService.restore(fileIds, userId);
     }
 
@@ -89,11 +90,11 @@ public class RecycleBinServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void restoreSameNameWithExistFileFailTest() {
-        String userId = deleteAndCreateSameNameFile();
+        Long userId = deleteAndCreateSameNameFile();
         List<RPanUserFileVO> rPanUserFileVOList = iRecycleBinService.list(userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
-        List<String> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
-        String fileIds = StringUtils.join(fileIdList.toArray(), CommonConstant.COMMON_SEPARATOR);
+        List<Long> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
+        String fileIds = StringListUtil.longListToString(fileIdList);
         iRecycleBinService.restore(fileIds, userId);
     }
 
@@ -103,11 +104,11 @@ public class RecycleBinServiceTest {
     @Test
     @Rollback
     public void deleteSuccessTest() {
-        String userId = deleteFile();
+        Long userId = deleteFile();
         List<RPanUserFileVO> rPanUserFileVOList = iRecycleBinService.list(userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
-        List<String> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
-        String fileIds = StringUtils.join(fileIdList.toArray(), CommonConstant.COMMON_SEPARATOR);
+        List<Long> fileIdList = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
+        String fileIds = StringListUtil.longListToString(fileIdList);
         rPanUserFileVOList = iRecycleBinService.delete(fileIds, userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
     }
@@ -119,10 +120,10 @@ public class RecycleBinServiceTest {
      *
      * @return
      */
-    private String register() {
+    private Long register() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        return userId;
+        return Long.valueOf(userId);
     }
 
     /**
@@ -131,7 +132,7 @@ public class RecycleBinServiceTest {
      * @param userId
      * @return
      */
-    private RPanUserVO info(String userId) {
+    private RPanUserVO info(Long userId) {
         RPanUserVO rPanUserVO = iUserService.info(userId);
         Assert.assertNotNull(rPanUserVO);
         return rPanUserVO;
@@ -142,8 +143,8 @@ public class RecycleBinServiceTest {
      *
      * @return
      */
-    private String deleteFile() {
-        String userId = register();
+    private Long deleteFile() {
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         RPanUserFileVO folder = createFolder(rPanUserVO.getRootFileId(), userId);
         deleteFile(rPanUserVO.getRootFileId(), userId, folder.getFileId());
@@ -157,7 +158,7 @@ public class RecycleBinServiceTest {
      * @param userId
      * @return
      */
-    private RPanUserFileVO createFolder(String parentId, String userId) {
+    private RPanUserFileVO createFolder(Long parentId, Long userId) {
         String folderName = "test-folder-1";
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(parentId, folderName, userId);
         Assert.assertTrue(rPanUserFileVOList.size() > 0);
@@ -171,8 +172,8 @@ public class RecycleBinServiceTest {
      * @param userId
      * @param fileId
      */
-    private void deleteFile(String parentId, String userId, String fileId) {
-        iUserFileService.delete(parentId, fileId, userId);
+    private void deleteFile(Long parentId, Long userId, Long fileId) {
+        iUserFileService.delete(parentId, StringListUtil.longListToString(fileId), userId);
     }
 
     /**
@@ -180,8 +181,8 @@ public class RecycleBinServiceTest {
      *
      * @return
      */
-    private String deleteSameNameFile() {
-        String userId = register();
+    private Long deleteSameNameFile() {
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         RPanUserFileVO folder = createFolder(rPanUserVO.getRootFileId(), userId);
         deleteFile(rPanUserVO.getRootFileId(), userId, folder.getFileId());
@@ -195,8 +196,8 @@ public class RecycleBinServiceTest {
      *
      * @return
      */
-    private String deleteAndCreateSameNameFile() {
-        String userId = register();
+    private Long deleteAndCreateSameNameFile() {
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         RPanUserFileVO folder = createFolder(rPanUserVO.getRootFileId(), userId);
         deleteFile(rPanUserVO.getRootFileId(), userId, folder.getFileId());

@@ -34,7 +34,7 @@ public class JwtUtil {
      * @param expire
      * @return
      */
-    public static String generateToken(String subject, String claimKey, String claimValue, Long expire) {
+    public static String generateToken(String subject, String claimKey, Object claimValue, Long expire) {
         String token = Jwts.builder()
                 .setSubject(subject)
                 .claim(claimKey, claimValue)
@@ -51,7 +51,7 @@ public class JwtUtil {
      * @param token
      * @return
      */
-    public static String analyzeToken(String token, String claimKey) {
+    public static Object analyzeToken(String token, String claimKey) {
         if (StringUtils.isBlank(token)) {
             return CommonConstant.EMPTY_STR;
         }
@@ -60,10 +60,9 @@ public class JwtUtil {
                     .setSigningKey(JWT_PRIVATE_KEY)
                     .parseClaimsJws(token)
                     .getBody();
-            Object userId = claims.get(claimKey);
-            return Objects.isNull(userId) ? CommonConstant.EMPTY_STR : userId.toString();
+            return claims.get(claimKey);
         } catch (Exception e) {
-            return CommonConstant.EMPTY_STR;
+            throw e;
         }
     }
 

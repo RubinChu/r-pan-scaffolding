@@ -36,19 +36,26 @@
                     _this.$message.error('请选择要下载的文件')
                     return
                 }
-                if (!_this.item && _this.multipleSelection.length > 1) {
-                    _this.$message.error('请选择一个文件进行下载')
-                    return
+                if (!_this.item) {
+                    _this.multipleSelection
+                    for (let i = 0, iLength = _this.multipleSelection.length; i < iLength; i++) {
+                        if (_this.multipleSelection[i].folderFlag === 1) {
+                            _this.$message.error('文件夹暂不支持下载')
+                            return
+                        }
+                    }
+                    _this.doDownLoads(_this.multipleSelection)
                 }
-                let item = _this.item ? _this.item : _this.multipleSelection[0]
-                if (item.folderFlag === 1) {
-                    _this.$message.error('文件夹暂不支持下载')
-                    return
+                if (_this.item) {
+                    if (_this.item.folderFlag === 1) {
+                        _this.$message.error('文件夹暂不支持下载')
+                        return
+                    }
+                    _this.doDownload(_this.item)
                 }
-                _this.doDownload(item)
             },
             doDownload(item) {
-                let url = panUtil.getUrlPrefix() + '/file/download?fileId=' + item.fileId + '&token=' + getToken(),
+                let url = panUtil.getUrlPrefix() + '/file/download?fileId=' + item.fileId + '&authorization=' + getToken(),
                     filename = item.filename,
                     link = document.createElement('a')
                 link.style.display = 'none'
@@ -57,6 +64,20 @@
                 document.body.appendChild(link)
                 link.click()
                 document.body.removeChild(link)
+            },
+            doDownLoads(items, i) {
+                let _this = this
+                if (!i) {
+                    i = 0
+                }
+                if (items.length === i) {
+                    return
+                }
+                setTimeout(function () {
+                    _this.doDownload(items[i]);
+                    i++
+                    _this.doDownLoads(items, i)
+                }, 500);
             }
         },
         computed: {},

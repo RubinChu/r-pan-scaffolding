@@ -4,16 +4,14 @@ import com.google.common.base.Splitter;
 import com.rubin.rpan.common.config.props.FilePathConfig;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
-import com.rubin.rpan.common.util.DateUtil;
-import com.rubin.rpan.common.util.FileContentTypeUtil;
-import com.rubin.rpan.common.util.FileUtil;
-import com.rubin.rpan.common.util.UUIDUtil;
+import com.rubin.rpan.common.util.*;
 import com.rubin.rpan.modules.file.constant.FileConstant;
 import com.rubin.rpan.modules.file.dao.RPanFileMapper;
 import com.rubin.rpan.modules.file.entity.RPanFile;
 import com.rubin.rpan.modules.file.service.IFileService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,15 +22,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 物理文件业务处理类
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @Service(value = "fileService")
-@Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class FileServiceImpl implements IFileService {
+
+    private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
 
     @Autowired
     @Qualifier(value = "rPanFileMapper")
@@ -42,6 +42,10 @@ public class FileServiceImpl implements IFileService {
     @Qualifier(value = "filePathConfig")
     private FilePathConfig filePathConfig;
 
+    @Autowired
+    @Qualifier(value = "idGenerator")
+    private IdGenerator idGenerator;
+
     /**
      * 保存物理文件
      *
@@ -50,7 +54,7 @@ public class FileServiceImpl implements IFileService {
      * @return
      */
     @Override
-    public RPanFile save(MultipartFile file, String userId) {
+    public RPanFile save(MultipartFile file, Long userId) {
         RPanFile rPanFile = assembleRPanFile(file, userId);
         saveFileInfo(rPanFile);
         uploadFile(file, rPanFile);
@@ -68,8 +72,24 @@ public class FileServiceImpl implements IFileService {
         if (StringUtils.isBlank(fileIds)) {
             throw new RPanException("文件id不能为空");
         }
-        deleteFileInfos(fileIds);
+        // TODO 集成MQ 优化成异步消息操作 加上重试机制
         deletePhysicalFiles(fileIds);
+        deleteFileInfos(fileIds);
+    }
+
+    /**
+     * 获取实体文件详情
+     *
+     * @param realFileId
+     * @return
+     */
+    @Override
+    public RPanFile getFileDetail(Long realFileId) {
+        RPanFile rPanFile = rPanFileMapper.selectByPrimaryKey(realFileId);
+        if (Objects.isNull(rPanFile)) {
+            throw new RPanException("实体文件不存在");
+        }
+        return rPanFile;
     }
 
     /************************************************************************私有************************************************************************/
@@ -122,21 +142,21 @@ public class FileServiceImpl implements IFileService {
      * @param userId
      * @return
      */
-    private RPanFile assembleRPanFile(MultipartFile file, String userId) {
+    private RPanFile assembleRPanFile(MultipartFile file, Long userId) {
         RPanFile rPanFile = new RPanFile();
         String fileName = file.getOriginalFilename();
         String suffix = FileUtil.getFileSuffix(fileName);
         String newFileName = UUIDUtil.getUUID() + suffix;
         long fileSize = file.getSize();
-        rPanFile.setFileId(UUIDUtil.getUUID())
-                .setFilename(newFileName)
-                .setRealPath(getRealFilePath(newFileName))
-                .setFileSize(String.valueOf(fileSize))
-                .setFileSizeDesc(FileUtil.getFileSizeDesc(fileSize))
-                .setFileSuffix(suffix)
-                .setFilePreviewContentType(FileContentTypeUtil.get(fileName))
-                .setCreateUser(userId)
-                .setCreateTime(new Date());
+        rPanFile.setFileId(idGenerator.nextId());
+        rPanFile.setFilename(newFileName);
+        rPanFile.setRealPath(getRealFilePath(newFileName));
+        rPanFile.setFileSize(String.valueOf(fileSize));
+        rPanFile.setFileSizeDesc(FileUtil.getFileSizeDesc(fileSize));
+        rPanFile.setFileSuffix(suffix);
+        rPanFile.setFilePreviewContentType(FileContentTypeUtil.get(fileName));
+        rPanFile.setCreateUser(userId);
+        rPanFile.setCreateTime(new Date());
         return rPanFile;
     }
 

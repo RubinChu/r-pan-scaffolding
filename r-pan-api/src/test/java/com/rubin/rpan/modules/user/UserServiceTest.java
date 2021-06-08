@@ -5,7 +5,6 @@ import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
 import com.rubin.rpan.common.util.JwtUtil;
 import com.rubin.rpan.modules.share.vo.ShareUserInfoVO;
-import com.rubin.rpan.modules.user.constant.UserConstant;
 import com.rubin.rpan.modules.user.service.IUserService;
 import com.rubin.rpan.modules.user.vo.RPanUserVO;
 import org.junit.Assert;
@@ -100,7 +99,7 @@ public class UserServiceTest {
     public void getUserInfoSuccessTest() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        RPanUserVO rPanUserVO = iUserService.info(userId);
+        RPanUserVO rPanUserVO = iUserService.info(Long.valueOf(userId));
         Assert.assertNotNull(rPanUserVO);
     }
 
@@ -205,7 +204,7 @@ public class UserServiceTest {
                 password = "12345678";
         String userId = iUserService.register(username, password, "test-question", "test-answer");
 
-        iUserService.changePassword(password, "87654321", userId);
+        iUserService.changePassword(password, "87654321", Long.valueOf(userId));
     }
 
     /**
@@ -218,7 +217,7 @@ public class UserServiceTest {
                 password = "12345678";
         String userId = iUserService.register(username, password, "test-question", "test-answer");
 
-        iUserService.changePassword(password + "1", "87654321", userId);
+        iUserService.changePassword(password + "1", "87654321", Long.valueOf(userId));
     }
 
     /**
@@ -233,7 +232,7 @@ public class UserServiceTest {
         Assert.assertNotNull(userId);
         String token = iUserService.login(username, password);
         Assert.assertNotNull(token);
-        iUserService.exit(JwtUtil.analyzeToken(token, CommonConstant.LOGIN_USER_ID));
+        iUserService.exit(Long.valueOf(String.valueOf(JwtUtil.analyzeToken(token, CommonConstant.LOGIN_USER_ID))));
     }
 
     /**
@@ -246,7 +245,7 @@ public class UserServiceTest {
                 password = "12345678";
         String userId = iUserService.register(username, password, "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        ShareUserInfoVO shareUserInfoVO = iUserService.getShareUserInfo(userId);
+        ShareUserInfoVO shareUserInfoVO = iUserService.getShareUserInfo(Long.valueOf(userId));
         Assert.assertNotNull(shareUserInfoVO);
     }
 

@@ -13,13 +13,13 @@ import java.util.List;
 @Repository(value = "rPanFileMapper")
 public interface RPanFileMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long fileId);
 
     int insert(RPanFile record);
 
     int insertSelective(RPanFile record);
 
-    RPanFile selectByPrimaryKey(Integer id);
+    RPanFile selectByPrimaryKey(Long fileId);
 
     int updateByPrimaryKeySelective(RPanFile record);
 

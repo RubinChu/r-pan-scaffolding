@@ -78,7 +78,7 @@
                                     min-width="750">
                                 <template slot-scope="scope">
                                     <div @click="clickFilename(scope.row)" class="file-name-content">
-                                        <i :class="getFileFontElement(scope.row.type)"
+                                        <i :class="getFileFontElement(scope.row.fileType)"
                                            style="margin-right: 15px; font-size: 20px; cursor: pointer;"/>
                                         <span style="cursor:pointer;">{{ scope.row.filename }}</span>
                                     </div>
@@ -311,7 +311,7 @@
                 } else {
                     this.shareExpireDate = panUtil.formatTime(new Date(data.shareEndTime))
                 }
-                this.tableData = data.rpanUserFileVOList
+                this.tableData = data.rPanUserFileVOList
             },
             openShareCodePage() {
                 let _this = this
@@ -543,7 +543,7 @@
                             shareId: _this.getShareId()
                         }, res => {
                             if (res.status === 0) {
-                                let url = panUtil.getUrlPrefix() + '/file/download?fileId=' + item.fileId + '&token=' + getToken(),
+                                let url = panUtil.getUrlPrefix() + '/file/download?fileId=' + item.fileId + '&authorization=' + getToken(),
                                     filename = item.filename,
                                     link = document.createElement('a')
                                 link.style.display = 'none'
@@ -619,21 +619,19 @@
                     if (res.status === 0) {
                         _this.$message.success('保存成功')
                         _this.treeDialogVisible = false
-                        _this.loading = false
                     } else if (res.status === 10) {
                         _this.treeDialogVisible = false
-                        _this.loading = false
                         _this.loadUserInfo()
                         _this.login()
                     } else {
-                        window.location.reload()
+                        _this.$message.error(res.message)
                     }
+                    _this.loading = false
                 })
             }
         },
         computed: {},
         mounted() {
-            clearShareToken()
             this.loadShareInfo()
             this.loadUserInfo()
             this.pageLoading = false

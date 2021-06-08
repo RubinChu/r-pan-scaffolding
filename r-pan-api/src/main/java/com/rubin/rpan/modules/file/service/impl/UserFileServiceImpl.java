@@ -1,16 +1,14 @@
 package com.rubin.rpan.modules.file.service.impl;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
 import com.rubin.rpan.common.response.ResponseCode;
 import com.rubin.rpan.common.util.FileUtil;
 import com.rubin.rpan.common.util.HttpUtil;
-import com.rubin.rpan.common.util.UUIDUtil;
+import com.rubin.rpan.common.util.IdGenerator;
+import com.rubin.rpan.common.util.StringListUtil;
 import com.rubin.rpan.common.util.file.type.context.FileTypeContext;
-import com.rubin.rpan.modules.file.bo.RPanFileDownloadBO;
-import com.rubin.rpan.modules.file.bo.RPanFilePreviewBO;
 import com.rubin.rpan.modules.file.constant.FileConstant;
 import com.rubin.rpan.modules.file.dao.RPanUserFileMapper;
 import com.rubin.rpan.modules.file.entity.RPanFile;
@@ -20,12 +18,12 @@ import com.rubin.rpan.modules.file.service.IUserFileService;
 import com.rubin.rpan.modules.file.vo.BreadcrumbVO;
 import com.rubin.rpan.modules.file.vo.FolderTreeNode;
 import com.rubin.rpan.modules.file.vo.RPanUserFileVO;
-import com.rubin.rpan.modules.share.constant.ShareConstant;
 import com.rubin.rpan.modules.share.service.IShareService;
 import com.rubin.rpan.modules.user.service.IUserSearchHistoryService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,9 +40,10 @@ import java.util.stream.Collectors;
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @Service(value = "userFileService")
-@Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class UserFileServiceImpl implements IUserFileService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserFileServiceImpl.class);
 
     /**
      * 单位长度
@@ -71,6 +70,10 @@ public class UserFileServiceImpl implements IUserFileService {
     @Qualifier(value = "fileTypeContext")
     private FileTypeContext fileTypeContext;
 
+    @Autowired
+    @Qualifier(value = "idGenerator")
+    private IdGenerator idGenerator;
+
     /**
      * 获取文件列表
      *
@@ -80,7 +83,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> list(String parentId, String fileTypes, String userId) {
+    public List<RPanUserFileVO> list(Long parentId, String fileTypes, Long userId) {
         return list(parentId, fileTypes, userId, FileConstant.DelFlagEnum.NO.getCode());
     }
 
@@ -94,15 +97,15 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> list(String parentId, String fileTypes, String userId, Integer delFlag) {
-        List<String> fileTypeArray = null;
-        if (Objects.equals(CommonConstant.TOP_STR, parentId)) {
+    public List<RPanUserFileVO> list(Long parentId, String fileTypes, Long userId, Integer delFlag) {
+        List<Integer> fileTypeArray = null;
+        if (Objects.equals(CommonConstant.ZERO_LONG, parentId)) {
             return Lists.newArrayList();
         }
         if (!Objects.equals(fileTypes, FileConstant.ALL_FILE_TYPE)) {
-            fileTypeArray = Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileTypes);
+            fileTypeArray = StringListUtil.string2IntegerList(fileTypes);
         }
-        return rPanUserFileMapper.selectByUserIdAndFileTypeAndParentIdAndDelFlag(userId, fileTypeArray, parentId, delFlag);
+        return rPanUserFileMapper.selectRPanUserFileVOListByUserIdAndFileTypeAndParentIdAndDelFlag(userId, fileTypeArray, parentId, delFlag);
     }
 
     /**
@@ -113,7 +116,7 @@ public class UserFileServiceImpl implements IUserFileService {
      */
     @Override
     public List<RPanUserFileVO> list(String fileIds) {
-        return rPanUserFileMapper.selectRPanUserFileVOListByFileIdList(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        return rPanUserFileMapper.selectRPanUserFileVOListByFileIdList(StringListUtil.string2LongList(fileIds));
     }
 
     /**
@@ -125,7 +128,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> createFolder(String parentId, String folderName, String userId) {
+    public List<RPanUserFileVO> createFolder(Long parentId, String folderName, Long userId) {
         saveUserFile(parentId, folderName, FileConstant.FolderFlagEnum.YES, null, null, userId);
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId, FileConstant.DelFlagEnum.NO.getCode());
     }
@@ -139,11 +142,8 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> updateFilename(String fileId, String newFilename, String userId) {
-        RPanUserFile originalUserFileInfo = rPanUserFileMapper.selectByFileIdAndUserId(fileId, userId);
-        if (Objects.isNull(originalUserFileInfo)) {
-            throw new RPanException("该用户没有此文件");
-        }
+    public List<RPanUserFileVO> updateFilename(Long fileId, String newFilename, Long userId) {
+        RPanUserFile originalUserFileInfo = getRPanUserFileByFileIdAndParentId(fileId, userId);
         if (Objects.equals(originalUserFileInfo.getFilename(), newFilename)) {
             throw new RPanException("请使用一个新名称");
         }
@@ -151,6 +151,8 @@ public class UserFileServiceImpl implements IUserFileService {
             throw new RPanException("名称已被占用");
         }
         originalUserFileInfo.setFilename(newFilename);
+        originalUserFileInfo.setUpdateUser(userId);
+        originalUserFileInfo.setUpdateTime(new Date());
         if (rPanUserFileMapper.updateByPrimaryKeySelective(originalUserFileInfo) != CommonConstant.ONE_INT) {
             throw new RPanException("文件重命名失败");
         }
@@ -166,12 +168,12 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> delete(String parentId, String fileIds, String userId) {
-        List<String> idList = Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds);
+    public List<RPanUserFileVO> delete(Long parentId, String fileIds, Long userId) {
+        List<Long> idList = StringListUtil.string2LongList(fileIds);
         if (rPanUserFileMapper.deleteBatch(idList, userId) != idList.size()) {
             throw new RPanException("删除失败");
         }
-        iShareService.changeShareStatus(fileIds, ShareConstant.ShareStatus.FILE_DELETED);
+        iShareService.refreshShareStatus(getAllAvailableFileIdByFileIds(fileIds));
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId);
     }
 
@@ -183,7 +185,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> upload(MultipartFile file, String parentId, String userId) {
+    public List<RPanUserFileVO> upload(MultipartFile file, Long parentId, Long userId) {
         RPanFile rPanFile = uploadRealFile(file, userId);
         String filename = file.getOriginalFilename();
         saveUserFile(parentId, filename, FileConstant.FolderFlagEnum.NO, fileTypeContext.getFileTypeCode(filename), rPanFile.getFileId(), userId);
@@ -198,8 +200,10 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param userId
      */
     @Override
-    public void download(String fileId, HttpServletResponse response, String userId) {
-        if (Objects.isNull(rPanUserFileMapper.selectByFileIdAndUserId(fileId, userId))) {
+    public void download(Long fileId, HttpServletResponse response, Long userId) {
+        try {
+            getRPanUserFileByFileIdAndParentId(fileId, userId);
+        } catch (RPanException e) {
             throw new RPanException("您没有下载权限");
         }
         download(fileId, response);
@@ -212,15 +216,13 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param response
      */
     @Override
-    public void download(String fileId, HttpServletResponse response) {
+    public void download(Long fileId, HttpServletResponse response) {
         if (checkIsFolder(fileId)) {
             throw new RPanException("不能选择文件夹下载");
         }
-        RPanFileDownloadBO rPanFileDownloadBO = rPanUserFileMapper.selectRPanFileDownloadBOByFileId(fileId);
-        if (Objects.isNull(rPanFileDownloadBO)) {
-            throw new RPanException("文件不存在");
-        }
-        doDownload(new File(rPanFileDownloadBO.getRealPath()), response, rPanFileDownloadBO.getFilename());
+        RPanUserFile rPanUserFile = rPanUserFileMapper.selectByPrimaryKey(fileId);
+        RPanFile rPanFile = iFileService.getFileDetail(rPanUserFile.getRealFileId());
+        doDownload(new File(rPanFile.getRealPath()), response, rPanUserFile.getFilename());
     }
 
     /**
@@ -230,13 +232,13 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<FolderTreeNode> getFolderTree(String userId) {
+    public List<FolderTreeNode> getFolderTree(Long userId) {
         List<RPanUserFile> folderList = rPanUserFileMapper.selectFolderListByUserId(userId);
         return assembleFolderTree(folderList);
     }
 
     /**
-     * 转移文件(批量)
+     * 批量转移文件
      *
      * @param fileIds
      * @param parentId
@@ -245,12 +247,15 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> transfer(String fileIds, String parentId, String targetParentId, String userId) {
-        if (!checkIsFolder(targetParentId)) {
+    public List<RPanUserFileVO> transfer(String fileIds, Long parentId, Long targetParentId, Long userId) {
+        if (!checkIsFolder(targetParentId, userId)) {
             throw new RPanException("请选择要转移到的文件夹");
         }
+        if (!checkTargetParentIdAvailable(targetParentId, fileIds)) {
+            throw new RPanException("要转移的文件中包含选中的目标文件夹,请重新选择");
+        }
         // 查询所有要被转移的文件信息
-        List<RPanUserFile> toBeTransferredFileInfoList = rPanUserFileMapper.selectListByFileIdList(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        List<RPanUserFile> toBeTransferredFileInfoList = rPanUserFileMapper.selectListByFileIdList(StringListUtil.string2LongList(fileIds));
         toBeTransferredFileInfoList.stream().forEach(rPanUserFile -> transferOne(rPanUserFile, targetParentId));
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId);
     }
@@ -265,12 +270,12 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> copy(String fileIds, String parentId, String targetParentId, String userId) {
-        if (fileIds.indexOf(targetParentId) != CommonConstant.MINUS_ONE_INT) {
-            throw new RPanException("要复制的文件中包含选中的目标文件夹,请重新选择");
+    public List<RPanUserFileVO> copy(String fileIds, Long parentId, Long targetParentId, Long userId) {
+        if (!checkIsFolder(targetParentId, userId)) {
+            throw new RPanException("请选择要复制到的文件夹");
         }
-        if (!checkIsFolder(targetParentId)) {
-            throw new RPanException("请选择要转移到的文件夹");
+        if (!checkTargetParentIdAvailable(targetParentId, fileIds)) {
+            throw new RPanException("要复制的文件中包含选中的目标文件夹,请重新选择");
         }
         doCopyUserFiles(fileIds, targetParentId, userId);
         return list(parentId, FileConstant.ALL_FILE_TYPE, userId);
@@ -284,11 +289,11 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> search(String keyword, String fileTypes, String userId) {
+    public List<RPanUserFileVO> search(String keyword, String fileTypes, Long userId) {
         saveUserSearchHistory(keyword, userId);
-        List<String> fileTypeArray = null;
+        List<Integer> fileTypeArray = null;
         if (!Objects.equals(fileTypes, FileConstant.ALL_FILE_TYPE)) {
-            fileTypeArray = Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileTypes);
+            fileTypeArray = StringListUtil.string2IntegerList(fileTypes);
         }
         return rPanUserFileMapper.selectRPanUserFileVOListByUserIdAndFilenameAndFileTypes(userId, keyword, fileTypeArray);
     }
@@ -301,7 +306,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public RPanUserFileVO detail(String fileId, String userId) {
+    public RPanUserFileVO detail(Long fileId, Long userId) {
         return rPanUserFileMapper.selectRPanUserFileVOByFileIdAndUserId(fileId, userId);
     }
 
@@ -314,12 +319,12 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public List<BreadcrumbVO> getBreadcrumbs(String fileId, String userId) {
+    public List<BreadcrumbVO> getBreadcrumbs(Long fileId, Long userId) {
         List<RPanUserFile> rPanUserFileList = rPanUserFileMapper.selectFolderListByUserId(userId);
         if (CollectionUtils.isEmpty(rPanUserFileList)) {
             return Lists.newArrayList();
         }
-        Map<String, BreadcrumbVO> breadcrumbVOTransferMap = rPanUserFileList.stream().collect(Collectors.toMap(RPanUserFile::getFileId, BreadcrumbVO::assembleBreadcrumbVO));
+        Map<Long, BreadcrumbVO> breadcrumbVOTransferMap = rPanUserFileList.stream().collect(Collectors.toMap(RPanUserFile::getFileId, BreadcrumbVO::assembleBreadcrumbVO));
         List<BreadcrumbVO> breadcrumbVOList = Lists.newArrayList();
         BreadcrumbVO thisLevel = breadcrumbVOTransferMap.get(fileId);
         do {
@@ -338,15 +343,13 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param response
      */
     @Override
-    public void preview(String fileId, HttpServletResponse response, String userId) {
+    public void preview(Long fileId, HttpServletResponse response, Long userId) {
         if (checkIsFolder(fileId, userId)) {
             throw new RPanException("不能预览文件夹");
         }
-        RPanFilePreviewBO rPanFilePreviewBO = rPanUserFileMapper.selectRPanFilePreviewBOByFileId(fileId);
-        if (Objects.isNull(rPanFilePreviewBO)) {
-            throw new RPanException("文件不存在");
-        }
-        preview(new File(rPanFilePreviewBO.getRealPath()), response, rPanFilePreviewBO.getFilePreviewContentType());
+        RPanUserFile rPanUserFile = rPanUserFileMapper.selectByPrimaryKey(fileId);
+        RPanFile fileDetail = iFileService.getFileDetail(rPanUserFile.getRealFileId());
+        preview(new File(fileDetail.getRealPath()), response, fileDetail.getFilePreviewContentType());
     }
 
     /**
@@ -357,11 +360,11 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public void restoreUserFiles(String fileIds, String userId) {
-        if (StringUtils.isAnyBlank(fileIds, userId)) {
+    public void restoreUserFiles(String fileIds, Long userId) {
+        if (StringUtils.isBlank(fileIds) || Objects.isNull(userId)) {
             throw new RPanException("批量还原用户文件的删除状态失败");
         }
-        List<String> fileIdList = Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds);
+        List<Long> fileIdList = StringListUtil.string2LongList(fileIds);
         List<RPanUserFile> rPanUserFiles = rPanUserFileMapper.selectListByFileIdList(fileIdList);
         Set<String> cleanSet = rPanUserFiles.stream().map(rPanUserFile -> rPanUserFile.getParentId() + rPanUserFile.getFilename()).collect(Collectors.toSet());
         if (cleanSet.size() != rPanUserFiles.size()) {
@@ -385,20 +388,20 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public void physicalDeleteUserFiles(String fileIds, String userId) {
-        if (StringUtils.isAnyBlank(fileIds, userId)) {
+    public void physicalDeleteUserFiles(String fileIds, Long userId) {
+        if (StringUtils.isBlank(fileIds) || Objects.isNull(userId)) {
             throw new RPanException("物理删除用户文件失败");
         }
         List<RPanUserFile> rPanUserFileList = assembleAllToBeDeletedUserFileList(fileIds);
-        List<String> fileIdList = rPanUserFileList.stream().map(RPanUserFile::getFileId).collect(Collectors.toList());
+        List<Long> fileIdList = rPanUserFileList.stream().map(RPanUserFile::getFileId).collect(Collectors.toList());
         if (rPanUserFileMapper.physicalDeleteBatch(fileIdList, userId) != fileIdList.size()) {
             throw new RPanException("物理删除用户文件失败");
         }
-        Set<String> realFileIdSet = assembleAllUnusedRealFileIdSet(rPanUserFileList);
+        Set<Long> realFileIdSet = assembleAllUnusedRealFileIdSet(rPanUserFileList);
         if (CollectionUtils.isEmpty(realFileIdSet)) {
             return;
         }
-        iFileService.delete(StringUtils.join(realFileIdSet, CommonConstant.COMMON_SEPARATOR));
+        iFileService.delete(StringListUtil.longListToString(realFileIdSet));
     }
 
     /**
@@ -410,12 +413,18 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     @Override
-    public void saveBatch(String fileIds, String targetParentId, String userId) {
+    public void saveBatch(String fileIds, Long targetParentId, Long userId) {
+        if (!checkIsFolder(targetParentId, userId)) {
+            throw new RPanException("请选择要复制到的文件夹");
+        }
+        if (!checkTargetParentIdAvailable(targetParentId, fileIds)) {
+            throw new RPanException("要复制的文件中包含选中的目标文件夹,请重新选择");
+        }
         doCopyUserFiles(fileIds, targetParentId, userId);
     }
 
     /**
-     * 获取对应文件列表的所有文件以及自文件信息
+     * 获取对应文件列表的所有文件以及子文件信息
      *
      * @param fileIds
      * @return
@@ -425,13 +434,54 @@ public class UserFileServiceImpl implements IUserFileService {
         if (StringUtils.isBlank(fileIds)) {
             throw new RPanException(ResponseCode.ERROR_PARAM);
         }
-        List<RPanUserFileVO> rPanUserFileVOList = rPanUserFileMapper.selectRPanUserFileVOListByFileIdList(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        List<RPanUserFileVO> rPanUserFileVOList = rPanUserFileMapper.selectRPanUserFileVOListByFileIdList(StringListUtil.string2LongList(fileIds));
         if (CollectionUtils.isEmpty(rPanUserFileVOList)) {
             return Lists.newArrayList();
         }
         final List<RPanUserFileVO> allRPanUserFileVOList = Lists.newArrayList(rPanUserFileVOList);
         rPanUserFileVOList.stream().forEach(rPanUserFileVO -> findAllAvailableChildUserFile(allRPanUserFileVOList, rPanUserFileVO));
         return allRPanUserFileVOList;
+    }
+
+    /**
+     * 获取用户的顶级文件信息
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public RPanUserFile getUserTopFileInfo(Long userId) {
+        return rPanUserFileMapper.selectTopFolderByUserId(userId);
+    }
+
+    /**
+     * 通过文件id集合获取所有文件id和子文件id
+     *
+     * @param fileIds
+     * @return
+     */
+    @Override
+    public String getAllAvailableFileIdByFileIds(String fileIds) {
+        List<Long> fileIdList = StringListUtil.string2LongList(fileIds);
+        List<Long> allAvailableFileId = Lists.newArrayList(fileIdList);
+        fileIdList.stream().forEach(fileId -> findAllAvailableFileIdByFileId(allAvailableFileId, fileId));
+        return StringListUtil.longListToString(allAvailableFileId);
+    }
+
+    /**
+     * 校验所有的父文件夹以及当前文件有效
+     *
+     * @param fileIds
+     * @return
+     */
+    @Override
+    public boolean checkAllUpFileAvailable(List<Long> fileIds) {
+        for (Long fileId : fileIds) {
+            if (!checkUpFileAvailable(fileId)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /******************************************************私有****************************************************/
@@ -447,19 +497,19 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param realFileId
      * @return
      */
-    private RPanUserFile assembleRPanUserFile(String parentId, String userId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, String realFileId) {
+    private RPanUserFile assembleRPanUserFile(Long parentId, Long userId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId) {
         RPanUserFile rPanUserFile = new RPanUserFile();
-        rPanUserFile.setUserId(userId)
-                .setParentId(parentId)
-                .setFileId(UUIDUtil.getUUID())
-                .setFilename(filename)
-                .setType(fileType)
-                .setFolderFlag(folderFlag.getCode())
-                .setRealFileId(realFileId)
-                .setCreateUser(userId)
-                .setCreateTime(new Date())
-                .setUpdateUser(userId)
-                .setUpdateTime(new Date());
+        rPanUserFile.setUserId(userId);
+        rPanUserFile.setParentId(parentId);
+        rPanUserFile.setFileId(idGenerator.nextId());
+        rPanUserFile.setFilename(filename);
+        rPanUserFile.setFileType(fileType);
+        rPanUserFile.setFolderFlag(folderFlag.getCode());
+        rPanUserFile.setRealFileId(realFileId);
+        rPanUserFile.setCreateUser(userId);
+        rPanUserFile.setCreateTime(new Date());
+        rPanUserFile.setUpdateUser(userId);
+        rPanUserFile.setUpdateTime(new Date());
         handleDuplicateFileName(rPanUserFile);
         return rPanUserFile;
     }
@@ -474,7 +524,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param realFileId
      * @return
      */
-    private void saveUserFile(String parentId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, String realFileId, String userId) {
+    private void saveUserFile(Long parentId, String filename, FileConstant.FolderFlagEnum folderFlag, Integer fileType, Long realFileId, Long userId) {
         if (rPanUserFileMapper.insertSelective(assembleRPanUserFile(parentId, userId, filename, folderFlag, fileType, realFileId)) != CommonConstant.ONE_INT) {
             throw new RPanException("保存文件信息失败");
         }
@@ -497,7 +547,7 @@ public class UserFileServiceImpl implements IUserFileService {
             newFileNameWithoutSuffix = newFileName.substring(CommonConstant.ZERO_INT, newFileNamePointPosition);
             newFileNameSuffix = FileUtil.getFileSuffix(newFileName);
         }
-        List<RPanUserFileVO> rPanUserFileVOList = rPanUserFileMapper.selectByUserIdAndFileTypeAndParentIdAndDelFlag(rPanUserFile.getUserId(), null, rPanUserFile.getParentId(), FileConstant.DelFlagEnum.NO.getCode());
+        List<RPanUserFileVO> rPanUserFileVOList = rPanUserFileMapper.selectRPanUserFileVOListByUserIdAndFileTypeAndParentIdAndDelFlag(rPanUserFile.getUserId(), null, rPanUserFile.getParentId(), FileConstant.DelFlagEnum.NO.getCode());
         boolean noDuplicateFileNameFlag = rPanUserFileVOList.stream().noneMatch(rPanUserFileVO -> rPanUserFile.getFilename().equals(rPanUserFileVO.getFilename()));
         if (noDuplicateFileNameFlag) {
             return;
@@ -550,19 +600,18 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param targetParentId
      * @param userId
      */
-    private void complementToBeCopiedFileInfoList(final List<RPanUserFile> toBeCopiedFileInfoList, final String targetParentId, final String userId) {
+    private void complementToBeCopiedFileInfoList(final List<RPanUserFile> toBeCopiedFileInfoList, final Long targetParentId, final Long userId) {
         final List<RPanUserFile> allChildUserFileList = Lists.newArrayList();
         toBeCopiedFileInfoList.stream().forEach(rPanUserFile -> {
-            String fileId = rPanUserFile.getFileId(),
-                    newFileId = UUIDUtil.getUUID();
-            rPanUserFile.setParentId(targetParentId)
-                    .setId(null)
-                    .setUserId(userId)
-                    .setFileId(newFileId)
-                    .setCreateUser(userId)
-                    .setCreateTime(new Date())
-                    .setUpdateUser(userId)
-                    .setUpdateTime(new Date());
+            Long fileId = rPanUserFile.getFileId(),
+                    newFileId = idGenerator.nextId();
+            rPanUserFile.setParentId(targetParentId);
+            rPanUserFile.setUserId(userId);
+            rPanUserFile.setFileId(newFileId);
+            rPanUserFile.setCreateUser(userId);
+            rPanUserFile.setCreateTime(new Date());
+            rPanUserFile.setUpdateUser(userId);
+            rPanUserFile.setUpdateTime(new Date());
             handleDuplicateFileName(rPanUserFile);
             if (checkIsFolder(rPanUserFile)) {
                 assembleAllChildUserFile(allChildUserFileList, fileId, newFileId, userId);
@@ -621,13 +670,13 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param rPanUserFile
      * @param targetParentId
      */
-    private void transferOne(RPanUserFile rPanUserFile, String targetParentId) {
-        if (targetParentId.equals(rPanUserFile.getFileId()) || targetParentId.equals(rPanUserFile.getParentId())) {
+    private void transferOne(RPanUserFile rPanUserFile, Long targetParentId) {
+        if (rPanUserFile.getParentId().equals(targetParentId)) {
             return;
         }
-        rPanUserFile.setParentId(targetParentId)
-                .setUpdateUser(rPanUserFile.getCreateUser())
-                .setUpdateTime(new Date());
+        rPanUserFile.setParentId(targetParentId);
+        rPanUserFile.setUpdateUser(rPanUserFile.getCreateUser());
+        rPanUserFile.setUpdateTime(new Date());
         handleDuplicateFileName(rPanUserFile);
         // 修改文件信息
         if (rPanUserFileMapper.updateByPrimaryKeySelective(rPanUserFile) != CommonConstant.ONE_INT) {
@@ -637,13 +686,34 @@ public class UserFileServiceImpl implements IUserFileService {
     }
 
     /**
+     * 检查目标文件是不是子文件夹
+     *
+     * @param targetParentId
+     * @param rPanUserFile
+     * @return
+     */
+    private boolean checkIsChildFolder(Long targetParentId, RPanUserFile rPanUserFile) {
+        if (checkIsFolder(rPanUserFile)) {
+            List<RPanUserFile> allChildrenFile = Lists.newArrayList();
+            findAllChildUserFile(allChildrenFile, rPanUserFile.getFileId());
+            if (!CollectionUtils.isEmpty(allChildrenFile)) {
+                List<Long> childFolderIdList = allChildrenFile.stream().filter(this::checkIsFolder).map(RPanUserFile::getFileId).collect(Collectors.toList());
+                if (childFolderIdList.contains(targetParentId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * 上传真实文件
      *
      * @param file
      * @param userId
      * @return
      */
-    private RPanFile uploadRealFile(MultipartFile file, String userId) {
+    private RPanFile uploadRealFile(MultipartFile file, Long userId) {
         return iFileService.save(file, userId);
     }
 
@@ -658,14 +728,14 @@ public class UserFileServiceImpl implements IUserFileService {
             return Lists.newArrayList();
         }
         List<FolderTreeNode> folderTreeNodeList = folderList.stream().map(FolderTreeNode::assembleFolderTreeNode).collect(Collectors.toList());
-        Map<String, List<FolderTreeNode>> directoryTreeNodeParentGroup = folderTreeNodeList.stream().collect(Collectors.groupingBy(FolderTreeNode::getParentId));
+        Map<Long, List<FolderTreeNode>> directoryTreeNodeParentGroup = folderTreeNodeList.stream().collect(Collectors.groupingBy(FolderTreeNode::getParentId));
         folderTreeNodeList.stream().forEach(node -> {
             List<FolderTreeNode> children = directoryTreeNodeParentGroup.get(node.getId());
             if (!CollectionUtils.isEmpty(children)) {
                 node.setChildren(children);
             }
         });
-        return folderTreeNodeList.stream().filter(node -> Objects.equals(CommonConstant.TOP_STR, node.getParentId())).collect(Collectors.toList());
+        return folderTreeNodeList.stream().filter(node -> Objects.equals(CommonConstant.ZERO_LONG, node.getParentId())).collect(Collectors.toList());
     }
 
     /**
@@ -674,8 +744,8 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param fileId
      * @return
      */
-    private boolean checkIsFolder(String fileId) {
-        return checkIsFolder(rPanUserFileMapper.selectByFileId(fileId));
+    private boolean checkIsFolder(Long fileId) {
+        return checkIsFolder(rPanUserFileMapper.selectByPrimaryKey(fileId));
     }
 
     /**
@@ -685,7 +755,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param userId
      * @return
      */
-    private boolean checkIsFolder(String fileId, String userId) {
+    private boolean checkIsFolder(Long fileId, Long userId) {
         return checkIsFolder(rPanUserFileMapper.selectByFileIdAndUserId(fileId, userId));
     }
 
@@ -697,7 +767,7 @@ public class UserFileServiceImpl implements IUserFileService {
      */
     private boolean checkIsFolder(RPanUserFile rPanUserFile) {
         if (Objects.isNull(rPanUserFile)) {
-            throw new RPanException("文件夹不存在");
+            throw new RPanException("文件不存在");
         }
         return Objects.equals(FileConstant.FolderFlagEnum.YES.getCode(), rPanUserFile.getFolderFlag());
     }
@@ -710,7 +780,7 @@ public class UserFileServiceImpl implements IUserFileService {
      */
     private boolean checkIsFolder(RPanUserFileVO rPanUserFileVO) {
         if (Objects.isNull(rPanUserFileVO)) {
-            throw new RPanException("文件夹不存在");
+            throw new RPanException("文件不存在");
         }
         return Objects.equals(FileConstant.FolderFlagEnum.YES.getCode(), rPanUserFileVO.getFolderFlag());
     }
@@ -724,22 +794,21 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param userId
      * @return
      */
-    private void assembleAllChildUserFile(final List<RPanUserFile> allChildUserFileList, String parentUserFileId, String newParentUserFileId, String userId) {
+    private void assembleAllChildUserFile(final List<RPanUserFile> allChildUserFileList, Long parentUserFileId, Long newParentUserFileId, Long userId) {
         List<RPanUserFile> childUserFileList = rPanUserFileMapper.selectAvailableListByParentId(parentUserFileId);
         if (CollectionUtils.isEmpty(childUserFileList)) {
             return;
         }
         childUserFileList.stream().forEach(childUserFile -> {
-            String fileId = childUserFile.getFileId(),
-                    newFileId = UUIDUtil.getUUID();
-            childUserFile.setParentId(newParentUserFileId)
-                    .setId(null)
-                    .setUserId(userId)
-                    .setFileId(newFileId)
-                    .setCreateUser(userId)
-                    .setCreateTime(new Date())
-                    .setUpdateUser(userId)
-                    .setUpdateTime(new Date());
+            Long fileId = childUserFile.getFileId(),
+                    newFileId = idGenerator.nextId();
+            childUserFile.setParentId(newParentUserFileId);
+            childUserFile.setUserId(userId);
+            childUserFile.setFileId(newFileId);
+            childUserFile.setCreateUser(userId);
+            childUserFile.setCreateTime(new Date());
+            childUserFile.setUpdateUser(userId);
+            childUserFile.setUpdateTime(new Date());
             allChildUserFileList.add(childUserFile);
             if (checkIsFolder(childUserFile)) {
                 assembleAllChildUserFile(allChildUserFileList, fileId, newFileId, userId);
@@ -753,7 +822,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param realFileId
      * @return
      */
-    private boolean checkRealFileUsed(String realFileId) {
+    private boolean checkRealFileUsed(Long realFileId) {
         return rPanUserFileMapper.selectCountByRealFileId(realFileId) > CommonConstant.ZERO_INT;
     }
 
@@ -763,7 +832,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param allChildUserFileList
      * @param parentId
      */
-    private void findAllChildUserFile(final List<RPanUserFile> allChildUserFileList, String parentId) {
+    private void findAllChildUserFile(final List<RPanUserFile> allChildUserFileList, Long parentId) {
         List<RPanUserFile> childUserFileList = rPanUserFileMapper.selectAllListByParentId(parentId);
         if (CollectionUtils.isEmpty(childUserFileList)) {
             return;
@@ -780,7 +849,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param keyword
      * @param userId
      */
-    private void saveUserSearchHistory(String keyword, String userId) {
+    private void saveUserSearchHistory(String keyword, Long userId) {
         iUserSearchHistoryService.save(keyword, userId);
     }
 
@@ -791,7 +860,7 @@ public class UserFileServiceImpl implements IUserFileService {
      * @return
      */
     private List<RPanUserFile> assembleAllToBeDeletedUserFileList(String fileIds) {
-        List<RPanUserFile> rPanUserFileList = rPanUserFileMapper.selectListByFileIdList(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        List<RPanUserFile> rPanUserFileList = rPanUserFileMapper.selectListByFileIdList(StringListUtil.string2LongList(fileIds));
         final List<RPanUserFile> allChildUserFileList = Lists.newArrayList();
         rPanUserFileList.stream()
                 .filter(rPanUserFile -> checkIsFolder(rPanUserFile))
@@ -806,8 +875,8 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param rPanUserFileList
      * @return
      */
-    private Set<String> assembleAllUnusedRealFileIdSet(List<RPanUserFile> rPanUserFileList) {
-        Set<String> realFileIdSet = rPanUserFileList.stream()
+    private Set<Long> assembleAllUnusedRealFileIdSet(List<RPanUserFile> rPanUserFileList) {
+        Set<Long> realFileIdSet = rPanUserFileList.stream()
                 .filter(rPanUserFile -> !checkIsFolder(rPanUserFile))
                 .filter(rPanUserFile -> !checkRealFileUsed(rPanUserFile.getRealFileId()))
                 .map(RPanUserFile::getRealFileId)
@@ -823,12 +892,9 @@ public class UserFileServiceImpl implements IUserFileService {
      * @param userId
      * @return
      */
-    private void doCopyUserFiles(String fileIds, String targetParentId, String userId) {
-        if (!checkIsFolder(targetParentId, userId)) {
-            throw new RPanException("请选择要复制到的文件夹");
-        }
+    private void doCopyUserFiles(String fileIds, Long targetParentId, Long userId) {
         // 查询所有要被复制的文件信息
-        List<RPanUserFile> toBeCopiedFileInfoList = rPanUserFileMapper.selectListByFileIdList(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        List<RPanUserFile> toBeCopiedFileInfoList = rPanUserFileMapper.selectListByFileIdList(StringListUtil.string2LongList(fileIds));
         complementToBeCopiedFileInfoList(toBeCopiedFileInfoList, targetParentId, userId);
         // 批量新增文件信息
         if (rPanUserFileMapper.insertBatch(toBeCopiedFileInfoList) != toBeCopiedFileInfoList.size()) {
@@ -852,6 +918,84 @@ public class UserFileServiceImpl implements IUserFileService {
         }
         allRPanUserFileVOList.addAll(rPanUserFileVOList);
         rPanUserFileVOList.stream().forEach(rPanUserFileVOItem -> findAllAvailableChildUserFile(allRPanUserFileVOList, rPanUserFileVOItem));
+    }
+
+    /**
+     * 根据用户id和文件id查询对应的文件信息
+     *
+     * @param fileId
+     * @param userId
+     * @return
+     */
+    private RPanUserFile getRPanUserFileByFileIdAndParentId(Long fileId, Long userId) {
+        RPanUserFile originalUserFileInfo = rPanUserFileMapper.selectByPrimaryKey(fileId);
+        if (Objects.isNull(originalUserFileInfo)) {
+            throw new RPanException("该用户没有此文件");
+        }
+        if (!Objects.equals(originalUserFileInfo.getUserId(), userId)) {
+            throw new RPanException("该用户没有此文件");
+        }
+        if (Objects.equals(FileConstant.DelFlagEnum.YES.getCode(), originalUserFileInfo.getDelFlag())) {
+            throw new RPanException("该用户没有此文件");
+        }
+        return originalUserFileInfo;
+    }
+
+    /**
+     * 校验目标文件夹是否合法
+     * 1、 不是选中的文件夹
+     * 2、 不是选中文件夹的子文件夹
+     *
+     * @param targetParentId
+     * @param fileIds
+     * @return
+     */
+    private boolean checkTargetParentIdAvailable(Long targetParentId, String fileIds) {
+        List<Long> fileIdList = StringListUtil.string2LongList(fileIds);
+        if (fileIdList.contains(targetParentId)) {
+            return false;
+        }
+        for (Long fileId : fileIdList) {
+            if (checkIsChildFolder(targetParentId, rPanUserFileMapper.selectByPrimaryKey(fileId))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 递归查询所有有效的子节点id
+     *
+     * @param allAvailableFileId
+     * @param fileId
+     */
+    private void findAllAvailableFileIdByFileId(List<Long> allAvailableFileId, Long fileId) {
+        if (!checkIsFolder(fileId)) {
+            return;
+        }
+        List<Long> childrenFileIds = rPanUserFileMapper.selectAvailableFileIdListByParentId(fileId);
+        if (CollectionUtils.isEmpty(childrenFileIds)) {
+            return;
+        }
+        allAvailableFileId.addAll(childrenFileIds);
+        childrenFileIds.stream().forEach(childrenFileId -> findAllAvailableFileIdByFileId(allAvailableFileId, childrenFileId));
+    }
+
+    /**
+     * 校验当前文件和所有父文件夹是否均正常
+     *
+     * @param fileId
+     * @return
+     */
+    private boolean checkUpFileAvailable(Long fileId) {
+        RPanUserFile rPanUserFile = rPanUserFileMapper.selectByPrimaryKey(fileId);
+        if (rPanUserFile.getDelFlag().equals(FileConstant.DelFlagEnum.YES.getCode())) {
+            return false;
+        }
+        if (rPanUserFile.getParentId().equals(CommonConstant.ZERO_LONG)) {
+            return true;
+        }
+        return checkUpFileAvailable(rPanUserFile.getParentId());
     }
 
 }

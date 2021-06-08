@@ -6,21 +6,19 @@ import com.rubin.rpan.modules.user.dao.RPanUserSearchHistoryMapper;
 import com.rubin.rpan.modules.user.entity.RPanUserSearchHistory;
 import com.rubin.rpan.modules.user.service.IUserSearchHistoryService;
 import com.rubin.rpan.modules.user.vo.RPanUserSearchHistoryVO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 用户搜索历史业务处理实现类
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @Service(value = "userSearchHistoryService")
-@Slf4j
 public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
 
     @Autowired
@@ -34,7 +32,7 @@ public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
      * @return
      */
     @Override
-    public List<RPanUserSearchHistoryVO> list(String userId) {
+    public List<RPanUserSearchHistoryVO> list(Long userId) {
         return rPanUserSearchHistoryMapper.selectRPanUserSearchHistoryVOListByUserId(userId);
     }
 
@@ -46,11 +44,11 @@ public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
      * @return
      */
     @Override
-    public List<RPanUserSearchHistoryVO> save(String searchContent, String userId) {
-        if (checkForDuplication(searchContent, userId)) {
-            stickSearchContent(searchContent, userId);
-        } else {
+    public List<RPanUserSearchHistoryVO> save(String searchContent, Long userId) {
+        try {
             saveSearchContent(searchContent, userId);
+        } catch (DuplicateKeyException e) {
+            stickSearchContent(searchContent, userId);
         }
         return list(userId);
     }
@@ -64,24 +62,13 @@ public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
      * @param userId
      * @return
      */
-    private RPanUserSearchHistory assembleRPanUserSearchHistoryEntity(String searchContent, String userId) {
+    private RPanUserSearchHistory assembleRPanUserSearchHistoryEntity(String searchContent, Long userId) {
         RPanUserSearchHistory rPanUserSearchHistory = new RPanUserSearchHistory();
-        rPanUserSearchHistory.setSearchContent(searchContent)
-                .setUserId(userId)
-                .setCreateTime(new Date())
-                .setUpdateTime(new Date());
+        rPanUserSearchHistory.setSearchContent(searchContent);
+        rPanUserSearchHistory.setUserId(userId);
+        rPanUserSearchHistory.setCreateTime(new Date());
+        rPanUserSearchHistory.setUpdateTime(new Date());
         return rPanUserSearchHistory;
-    }
-
-    /**
-     * 检查是否有重复数据
-     *
-     * @param searchContent
-     * @param userId
-     * @return
-     */
-    private boolean checkForDuplication(String searchContent, String userId) {
-        return !Objects.isNull(rPanUserSearchHistoryMapper.selectBySearchContentAndUserId(searchContent, userId));
     }
 
     /**
@@ -91,7 +78,7 @@ public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
      * @param userId
      * @return
      */
-    private void stickSearchContent(String searchContent, String userId) {
+    private void stickSearchContent(String searchContent, Long userId) {
         if (rPanUserSearchHistoryMapper.updateUpdateTimeBySearchContentAndUserId(searchContent, userId) != CommonConstant.ONE_INT) {
             throw new RPanException("置顶搜索历史信息失败");
         }
@@ -103,7 +90,7 @@ public class UserSearchHistoryServiceImpl implements IUserSearchHistoryService {
      * @param searchContent
      * @param userId
      */
-    private void saveSearchContent(String searchContent, String userId) {
+    private void saveSearchContent(String searchContent, Long userId) {
         if (rPanUserSearchHistoryMapper.insertSelective(assembleRPanUserSearchHistoryEntity(searchContent, userId)) != CommonConstant.ONE_INT) {
             throw new RPanException("保存搜索历史信息失败");
         }

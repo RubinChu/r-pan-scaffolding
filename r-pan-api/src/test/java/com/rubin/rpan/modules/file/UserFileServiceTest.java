@@ -3,7 +3,9 @@ package com.rubin.rpan.modules.file;
 import com.rubin.rpan.RPanApplication;
 import com.rubin.rpan.common.constant.CommonConstant;
 import com.rubin.rpan.common.exception.RPanException;
+import com.rubin.rpan.common.util.StringListUtil;
 import com.rubin.rpan.modules.file.constant.FileConstant;
+import com.rubin.rpan.modules.file.entity.RPanUserFile;
 import com.rubin.rpan.modules.file.service.IUserFileService;
 import com.rubin.rpan.modules.file.vo.BreadcrumbVO;
 import com.rubin.rpan.modules.file.vo.FolderTreeNode;
@@ -24,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 用户文件业务测试类
@@ -50,13 +54,13 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void listSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.list(rPanUserVO.getRootFileId(), FileConstant.ALL_FILE_TYPE, userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
         rPanUserFileVOList = iUserFileService.list(rPanUserVO.getRootFileId(), FileConstant.ALL_FILE_TYPE, userId, FileConstant.DelFlagEnum.NO.getCode());
         Assert.assertEquals(0, rPanUserFileVOList.size());
-        rPanUserFileVOList = iUserFileService.list(rPanUserVO.getRootFileId());
+        rPanUserFileVOList = iUserFileService.list(StringListUtil.longListToString(rPanUserVO.getRootFileId()));
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
 
@@ -66,7 +70,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void createFolderSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -78,7 +82,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void createFolderHandleSameNameSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -92,7 +96,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void updateFilenameSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder", userId);
         RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
@@ -106,12 +110,12 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void updateFilenameNoThatFileFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
-        rPanUserFileVOList = iUserFileService.updateFilename(rPanUserFileVO.getFileId() + "1", rPanUserFileVO.getFilename() + "_update", userId);
+        rPanUserFileVOList = iUserFileService.updateFilename(0L, rPanUserFileVO.getFilename() + "_update", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
 
@@ -121,7 +125,7 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void updateFilenameNoNewFilenameFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -136,7 +140,7 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void updateFilenameNewFilenameExitFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -153,12 +157,12 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void deleteSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
-        rPanUserFileVOList = iUserFileService.delete(rPanUserFileVO.getParentId(), rPanUserFileVO.getFileId(), userId);
+        rPanUserFileVOList = iUserFileService.delete(rPanUserFileVO.getParentId(), StringListUtil.longListToString(rPanUserFileVO.getFileId()), userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
     }
 
@@ -168,7 +172,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void uploadSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserVO.getRootFileId(), userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -180,7 +184,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void getFolderTreeSuccessTest() {
-        String userId = register();
+        Long userId = register();
         List<FolderTreeNode> folderTreeNodeList = iUserFileService.getFolderTree(userId);
         Assert.assertEquals(1, folderTreeNodeList.size());
     }
@@ -191,7 +195,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void transferSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -199,7 +203,7 @@ public class UserFileServiceTest {
         Assert.assertEquals(2, rPanUserFileVOList.size());
         RPanUserFileVO targetFolder = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
         RPanUserFileVO toBeTransferFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-2", rPanUserFileVO1.getFilename())).findFirst().get();
-        rPanUserFileVOList = iUserFileService.transfer(toBeTransferFile.getFileId(), toBeTransferFile.getParentId(), targetFolder.getFileId(), userId);
+        rPanUserFileVOList = iUserFileService.transfer(StringListUtil.longListToString(toBeTransferFile.getFileId()), toBeTransferFile.getParentId(), targetFolder.getFileId(), userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
 
@@ -209,7 +213,7 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void transferTargetFileIsNotFolderFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -217,7 +221,7 @@ public class UserFileServiceTest {
         Assert.assertEquals(2, rPanUserFileVOList.size());
         RPanUserFileVO toBeTransferFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
         RPanUserFileVO targetFolderFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test.txt", rPanUserFileVO1.getFilename())).findFirst().get();
-        iUserFileService.transfer(toBeTransferFile.getFileId(), toBeTransferFile.getParentId(), targetFolderFile.getFileId(), userId);
+        iUserFileService.transfer(StringListUtil.longListToString(toBeTransferFile.getFileId()), toBeTransferFile.getParentId(), targetFolderFile.getFileId(), userId);
     }
 
     /**
@@ -226,12 +230,12 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void copySuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO toBeCopiedFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
-        rPanUserFileVOList = iUserFileService.copy(toBeCopiedFile.getFileId(), toBeCopiedFile.getParentId(), toBeCopiedFile.getParentId(), userId);
+        rPanUserFileVOList = iUserFileService.copy(StringListUtil.longListToString(toBeCopiedFile.getFileId()), toBeCopiedFile.getParentId(), toBeCopiedFile.getParentId(), userId);
         Assert.assertEquals(2, rPanUserFileVOList.size());
     }
 
@@ -241,12 +245,12 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void copyFileIdsContainTargetParentIdFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO toBeCopiedFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
-        iUserFileService.copy(toBeCopiedFile.getFileId(), toBeCopiedFile.getParentId(), toBeCopiedFile.getFileId(), userId);
+        iUserFileService.copy(StringListUtil.longListToString(toBeCopiedFile.getFileId()), toBeCopiedFile.getParentId(), toBeCopiedFile.getFileId(), userId);
     }
 
     /**
@@ -255,15 +259,15 @@ public class UserFileServiceTest {
     @Test(expected = RPanException.class)
     @Rollback
     public void copyTargetFileIsNotFolderFailTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserVO.getRootFileId(), userId);
         Assert.assertEquals(2, rPanUserFileVOList.size());
-        RPanUserFileVO toBeTransferFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
+        RPanUserFileVO toBeCopiedFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
         RPanUserFileVO targetFolderFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test.txt", rPanUserFileVO1.getFilename())).findFirst().get();
-        iUserFileService.copy(toBeTransferFile.getFileId(), toBeTransferFile.getParentId(), targetFolderFile.getFileId(), userId);
+        iUserFileService.copy(StringListUtil.longListToString(toBeCopiedFile.getFileId()), toBeCopiedFile.getParentId(), targetFolderFile.getFileId(), userId);
     }
 
     /**
@@ -272,8 +276,8 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void searchSuccessTest() {
-        String userId = register(),
-                searchContent = "test-folder-1";
+        Long userId = register();
+        String searchContent = "test-folder-1";
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), searchContent, userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -287,7 +291,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void detailSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -301,7 +305,7 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void getBreadcrumbsSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
@@ -316,14 +320,14 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void restoreUserFilesSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
-        rPanUserFileVOList = iUserFileService.delete(rPanUserFileVO.getParentId(), rPanUserFileVO.getFileId(), userId);
+        rPanUserFileVOList = iUserFileService.delete(rPanUserFileVO.getParentId(), StringListUtil.longListToString(rPanUserFileVO.getFileId()), userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
-        iUserFileService.restoreUserFiles(rPanUserFileVO.getFileId(), userId);
+        iUserFileService.restoreUserFiles(StringListUtil.longListToString(rPanUserFileVO.getFileId()), userId);
         rPanUserFileVOList = iUserFileService.list(rPanUserFileVO.getParentId(), FileConstant.ALL_FILE_TYPE, userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
     }
@@ -343,13 +347,14 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void physicalDeleteUserFilesSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserVO.getRootFileId(), userId);
         Assert.assertEquals(2, rPanUserFileVOList.size());
-        iUserFileService.physicalDeleteUserFiles(StringUtils.join(rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).toArray(), CommonConstant.COMMON_SEPARATOR), userId);
+        List<Long> fileIds = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toList());
+        iUserFileService.physicalDeleteUserFiles(StringListUtil.longListToString(fileIds), userId);
         rPanUserFileVOList = iUserFileService.list(rPanUserVO.getRootFileId(), FileConstant.ALL_FILE_TYPE, userId);
         Assert.assertEquals(0, rPanUserFileVOList.size());
     }
@@ -360,12 +365,12 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void saveBatchSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO toBeCopiedFile = rPanUserFileVOList.stream().filter(rPanUserFileVO1 -> Objects.equals("test-folder-1", rPanUserFileVO1.getFilename())).findFirst().get();
-        iUserFileService.saveBatch(toBeCopiedFile.getFileId(), toBeCopiedFile.getParentId(), userId);
+        iUserFileService.saveBatch(StringListUtil.longListToString(toBeCopiedFile.getFileId()), toBeCopiedFile.getParentId(), userId);
         rPanUserFileVOList = iUserFileService.list(toBeCopiedFile.getParentId(), FileConstant.ALL_FILE_TYPE, userId);
         Assert.assertEquals(2, rPanUserFileVOList.size());
     }
@@ -376,15 +381,63 @@ public class UserFileServiceTest {
     @Test
     @Rollback
     public void allListSuccessTest() {
-        String userId = register();
+        Long userId = register();
         RPanUserVO rPanUserVO = info(userId);
         List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
         RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
         rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserFileVO.getFileId(), userId);
         Assert.assertEquals(1, rPanUserFileVOList.size());
-        rPanUserFileVOList = iUserFileService.allList(rPanUserFileVO.getFileId());
+        rPanUserFileVOList = iUserFileService.allList(StringListUtil.longListToString(rPanUserFileVO.getFileId()));
         Assert.assertEquals(2, rPanUserFileVOList.size());
+    }
+
+    /**
+     * 测试获取对应文件列表的所有文件以及自文件信息成功
+     */
+    @Test
+    @Rollback
+    public void getUserTopFileInfoSuccessTest() {
+        Long userId = register();
+        RPanUserFile userTopFileInfo = iUserFileService.getUserTopFileInfo(userId);
+        Assert.assertNotNull(userTopFileInfo);
+    }
+
+    /**
+     * 测试获取对应文件列表的所有文件以及自文件信息成功
+     */
+    @Test
+    @Rollback
+    public void getAllAvailableFileIdByFileIdsSuccessTest() {
+        Long userId = register();
+        RPanUserVO rPanUserVO = info(userId);
+        List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
+        Assert.assertEquals(1, rPanUserFileVOList.size());
+        RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
+        rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserFileVO.getFileId(), userId);
+        Assert.assertEquals(1, rPanUserFileVOList.size());
+        String allAvailableFileIdByFileIds = iUserFileService.getAllAvailableFileIdByFileIds(StringListUtil.longListToString(rPanUserFileVO.getFileId()));
+        Assert.assertEquals(2, StringListUtil.string2LongList(allAvailableFileIdByFileIds).size());
+    }
+
+    /**
+     * 测试获取对应文件列表的所有文件以及自文件信息成功
+     */
+    @Test
+    @Rollback
+    public void checkAllUpFileAvailableSuccessTest() {
+        Long userId = register();
+        RPanUserVO rPanUserVO = info(userId);
+        List<RPanUserFileVO> rPanUserFileVOList = iUserFileService.createFolder(rPanUserVO.getRootFileId(), "test-folder-1", userId);
+        Assert.assertEquals(1, rPanUserFileVOList.size());
+        RPanUserFileVO rPanUserFileVO = rPanUserFileVOList.stream().findFirst().get();
+        rPanUserFileVOList = iUserFileService.upload(generateMultipartFile(), rPanUserFileVO.getFileId(), userId);
+        Assert.assertEquals(1, rPanUserFileVOList.size());
+        boolean available = iUserFileService.checkAllUpFileAvailable(Arrays.asList(rPanUserFileVO.getFileId()));
+        Assert.assertTrue(available);
+        iUserFileService.delete(rPanUserVO.getRootFileId(), rPanUserFileVO.getFileId().toString(), userId);
+        available = iUserFileService.checkAllUpFileAvailable(Arrays.asList(rPanUserFileVO.getFileId()));
+        Assert.assertFalse(available);
     }
 
     /********************************************************************************私有********************************************************************************/
@@ -394,10 +447,10 @@ public class UserFileServiceTest {
      *
      * @return
      */
-    private String register() {
+    private Long register() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        return userId;
+        return Long.valueOf(userId);
     }
 
     /**
@@ -406,7 +459,7 @@ public class UserFileServiceTest {
      * @param userId
      * @return
      */
-    private RPanUserVO info(String userId) {
+    private RPanUserVO info(Long userId) {
         RPanUserVO rPanUserVO = iUserService.info(userId);
         Assert.assertNotNull(rPanUserVO);
         return rPanUserVO;

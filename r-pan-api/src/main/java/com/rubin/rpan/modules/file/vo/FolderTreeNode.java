@@ -1,22 +1,21 @@
 package com.rubin.rpan.modules.file.vo;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.google.common.collect.Lists;
 import com.rubin.rpan.modules.file.entity.RPanUserFile;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 文件夹信息返回实体
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@Data
-@Accessors(chain = true)
 @ApiModel(value = "文件夹信息返回实体")
 public class FolderTreeNode implements Serializable {
 
@@ -31,8 +30,9 @@ public class FolderTreeNode implements Serializable {
     /**
      * 唯一标识
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("唯一标识")
-    private String id;
+    private Long id;
 
     /**
      * 子节点
@@ -43,8 +43,9 @@ public class FolderTreeNode implements Serializable {
     /**
      * 父文件夹ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     @ApiModelProperty("父文件夹ID")
-    private String parentId;
+    private Long parentId;
 
     /**
      * 拼装树节点
@@ -54,11 +55,72 @@ public class FolderTreeNode implements Serializable {
      */
     public static FolderTreeNode assembleFolderTreeNode(RPanUserFile rPanUserFile) {
         FolderTreeNode folderTreeNode = new FolderTreeNode();
-        folderTreeNode.setLabel(rPanUserFile.getFilename())
-                .setId(rPanUserFile.getFileId())
-                .setChildren(Lists.newArrayList())
-                .setParentId(rPanUserFile.getParentId());
+        folderTreeNode.setLabel(rPanUserFile.getFilename());
+        folderTreeNode.setId(rPanUserFile.getFileId());
+        folderTreeNode.setChildren(Lists.newArrayList());
+        folderTreeNode.setParentId(rPanUserFile.getParentId());
         return folderTreeNode;
+    }
+
+    public FolderTreeNode() {
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<FolderTreeNode> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<FolderTreeNode> children) {
+        this.children = children;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FolderTreeNode that = (FolderTreeNode) o;
+        return Objects.equals(label, that.label) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(children, that.children) &&
+                Objects.equals(parentId, that.parentId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(label, id, children, parentId);
+    }
+
+    @Override
+    public String toString() {
+        return "FolderTreeNode{" +
+                "label='" + label + '\'' +
+                ", id=" + id +
+                ", children=" + children +
+                ", parentId=" + parentId +
+                '}';
     }
 
 }

@@ -1,7 +1,5 @@
 package com.rubin.rpan.modules.file.dao;
 
-import com.rubin.rpan.modules.file.bo.RPanFileDownloadBO;
-import com.rubin.rpan.modules.file.bo.RPanFilePreviewBO;
 import com.rubin.rpan.modules.file.entity.RPanUserFile;
 import com.rubin.rpan.modules.file.vo.RPanUserFileVO;
 import org.apache.ibatis.annotations.Param;
@@ -16,59 +14,57 @@ import java.util.List;
 @Repository(value = "rPanUserFileMapper")
 public interface RPanUserFileMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long fileId);
 
     int insert(RPanUserFile record);
 
     int insertSelective(RPanUserFile record);
 
-    RPanUserFile selectByPrimaryKey(Integer id);
+    RPanUserFile selectByPrimaryKey(Long fileId);
 
     int updateByPrimaryKeySelective(RPanUserFile record);
 
     int updateByPrimaryKey(RPanUserFile record);
 
-    List<RPanUserFileVO> selectByUserIdAndFileTypeAndParentIdAndDelFlag(@Param("userId") String userId,
-                                                                        @Param("fileTypeArray") List<String> fileTypeArray,
-                                                                        @Param("parentId") String parentId,
-                                                                        @Param("delFlag") Integer delFlag);
+    List<RPanUserFileVO> selectRPanUserFileVOListByUserIdAndFileTypeAndParentIdAndDelFlag(@Param("userId") Long userId,
+                                                                                          @Param("fileTypeArray") List<Integer> fileTypeArray,
+                                                                                          @Param("parentId") Long parentId,
+                                                                                          @Param("delFlag") Integer delFlag);
 
-    RPanUserFile selectByFileId(@Param("fileId") String fileId);
+    RPanUserFile selectByFileIdAndUserId(@Param("fileId") Long fileId, @Param("userId") Long userId);
 
-    RPanUserFile selectByFileIdAndUserId(@Param("fileId")String fileId, @Param("userId") String userId);
-
-    int selectCountByUserIdAndFilenameAndParentId(@Param("userId") String userId,
+    int selectCountByUserIdAndFilenameAndParentId(@Param("userId") Long userId,
                                                   @Param("filename") String filename,
-                                                  @Param("parentId") String parentId);
+                                                  @Param("parentId") Long parentId);
 
-    int deleteBatch(@Param("idList") List<String> idList, @Param("userId") String userId);
+    int deleteBatch(@Param("idList") List<Long> idList, @Param("userId") Long userId);
 
-    RPanFileDownloadBO selectRPanFileDownloadBOByFileId(@Param("fileId") String fileId);
+    List<RPanUserFile> selectFolderListByUserId(@Param("userId") Long userId);
 
-    List<RPanUserFile> selectFolderListByUserId(@Param("userId") String userId);
-
-    List<RPanUserFile> selectListByFileIdList(@Param("idList") List<String> idList);
+    List<RPanUserFile> selectListByFileIdList(@Param("idList") List<Long> idList);
 
     int insertBatch(@Param("recordList") List<RPanUserFile> recordList);
 
-    List<RPanUserFileVO> selectRPanUserFileVOListByUserIdAndFilenameAndFileTypes(@Param("userId") String userId, @Param("keyword") String keyword, @Param("fileTypeArray") List<String> fileTypeArray);
+    List<RPanUserFileVO> selectRPanUserFileVOListByUserIdAndFilenameAndFileTypes(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("fileTypeArray") List<Integer> fileTypeArray);
 
-    RPanUserFileVO selectRPanUserFileVOByFileIdAndUserId(@Param("fileId") String fileId, @Param("userId") String userId);
+    RPanUserFileVO selectRPanUserFileVOByFileIdAndUserId(@Param("fileId") Long fileId, @Param("userId") Long userId);
 
-    RPanFilePreviewBO selectRPanFilePreviewBOByFileId(@Param("fileId") String fileId);
+    List<RPanUserFile> selectAllListByParentId(@Param("parentId") Long parentId);
 
-    List<RPanUserFile> selectAllListByParentId(@Param("parentId") String parentId);
+    List<RPanUserFile> selectAvailableListByParentId(@Param("parentId") Long parentId);
 
-    List<RPanUserFile> selectAvailableListByParentId(@Param("parentId") String parentId);
+    List<RPanUserFileVO> selectAvailableRPanUserFileVOListByParentId(@Param("parentId") Long parentId);
 
-    List<RPanUserFileVO> selectAvailableRPanUserFileVOListByParentId(@Param("parentId") String parentId);
+    int updateUserFileDelFlagByFileIdListAndUserId(@Param("fileIdList") List<Long> fileIdList, @Param("userId") Long userId);
 
-    int updateUserFileDelFlagByFileIdListAndUserId(@Param("fileIdList") List<String> fileIdList, @Param("userId") String userId);
+    int physicalDeleteBatch(@Param("fileIdList") List<Long> fileIdList, @Param("userId") Long userId);
 
-    int physicalDeleteBatch(@Param("fileIdList") List<String> fileIdList, @Param("userId") String userId);
+    int selectCountByRealFileId(@Param("realFileId") Long realFileId);
 
-    int selectCountByRealFileId(@Param("realFileId") String realFileId);
+    List<RPanUserFileVO> selectRPanUserFileVOListByFileIdList(@Param("fileIdList") List<Long> fileIdList);
 
-    List<RPanUserFileVO> selectRPanUserFileVOListByFileIdList(@Param("fileIdList") List<String> fileIdList);
+    RPanUserFile selectTopFolderByUserId(@Param("userId") Long userId);
+
+    List<Long> selectAvailableFileIdListByParentId(@Param("parentId") Long parentId);
 
 }

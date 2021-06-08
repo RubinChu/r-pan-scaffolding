@@ -1,6 +1,7 @@
 package com.rubin.rpan.common.config;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +15,9 @@ import javax.servlet.MultipartConfigElement;
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @SpringBootConfiguration
-@Slf4j
 public class FileUploadConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(FileUploadConfig.class);
 
     private static final Long MAX_SIZE = 3L * 1024L;
 

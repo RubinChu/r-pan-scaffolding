@@ -10,8 +10,8 @@ import java.util.List;
  */
 public interface IUserSearchHistoryService {
 
-    List<RPanUserSearchHistoryVO> list(String userId);
+    List<RPanUserSearchHistoryVO> list(Long userId);
 
-    List<RPanUserSearchHistoryVO> save(String searchContent, String userId);
+    List<RPanUserSearchHistoryVO> save(String searchContent, Long userId);
 
 }

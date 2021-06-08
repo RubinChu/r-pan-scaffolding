@@ -10,14 +10,16 @@ import java.util.List;
  */
 public interface IShareFileService {
 
-    void saveBatch(String shareId, String shareFileIds, String userId);
+    void saveBatch(Long shareId, String shareFileIds, Long userId);
 
     void cancelShareFiles(String shareIds);
 
-    List<RPanUserFileVO> getShareFileInfos(String shareId);
+    List<RPanUserFileVO> getShareFileInfos(Long shareId);
 
-    List<String> getShareIdByFileIds(String fileIds);
+    List<Long> getShareIdByFileIds(String fileIds);
 
-    List<RPanUserFileVO> getAllShareFileInfos(String shareId);
+    List<RPanUserFileVO> getAllShareFileInfos(Long shareId);
+
+    List<Long> getFileIdsByShareId(Long shareId);
 
 }

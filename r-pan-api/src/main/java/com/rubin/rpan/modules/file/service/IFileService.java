@@ -9,8 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface IFileService {
 
-    RPanFile save(MultipartFile file, String userId);
+    RPanFile save(MultipartFile file, Long userId);
 
     void delete(String fileIds);
+
+    RPanFile getFileDetail(Long realFileId);
 
 }

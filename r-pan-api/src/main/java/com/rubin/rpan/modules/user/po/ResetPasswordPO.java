@@ -2,20 +2,17 @@ package com.rubin.rpan.modules.user.po;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 用户重置密码PO
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
-@Data
-@Accessors(chain = true)
 @ApiModel(value = "用户重置密码PO")
 public class ResetPasswordPO implements Serializable {
 
@@ -43,5 +40,56 @@ public class ResetPasswordPO implements Serializable {
     @ApiModelProperty(value = "忘记密码验证token", required = true)
     @NotBlank(message = "token不能为空")
     private String token;
+
+    public ResetPasswordPO() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ResetPasswordPO that = (ResetPasswordPO) o;
+        return Objects.equals(username, that.username) &&
+                Objects.equals(newPassword, that.newPassword) &&
+                Objects.equals(token, that.token);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, newPassword, token);
+    }
+
+    @Override
+    public String toString() {
+        return "ResetPasswordPO{" +
+                "username='" + username + '\'' +
+                ", newPassword='" + newPassword + '\'' +
+                ", token='" + token + '\'' +
+                '}';
+    }
 
 }

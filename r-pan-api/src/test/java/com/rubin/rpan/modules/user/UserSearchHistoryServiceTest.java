@@ -41,9 +41,9 @@ public class UserSearchHistoryServiceTest {
     public void listSuccessTest() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        List<RPanUserSearchHistoryVO> rPanUserSearchHistoryVOList = iUserSearchHistoryService.save("test-search-content", userId);
+        List<RPanUserSearchHistoryVO> rPanUserSearchHistoryVOList = iUserSearchHistoryService.save("test-search-content", Long.valueOf(userId));
         Assert.assertEquals(1, rPanUserSearchHistoryVOList.size());
-        rPanUserSearchHistoryVOList = iUserSearchHistoryService.list(userId);
+        rPanUserSearchHistoryVOList = iUserSearchHistoryService.list(Long.valueOf(userId));
         Assert.assertEquals(1, rPanUserSearchHistoryVOList.size());
     }
 
@@ -55,7 +55,7 @@ public class UserSearchHistoryServiceTest {
     public void saveSuccessTest() {
         String userId = iUserService.register("test-user", "12345678", "test-question", "test-answer");
         Assert.assertNotNull(userId);
-        List<RPanUserSearchHistoryVO> rPanUserSearchHistoryVOList = iUserSearchHistoryService.save("test-search-content", userId);
+        List<RPanUserSearchHistoryVO> rPanUserSearchHistoryVOList = iUserSearchHistoryService.save("test-search-content", Long.valueOf(userId));
         Assert.assertEquals(1, rPanUserSearchHistoryVOList.size());
     }
 

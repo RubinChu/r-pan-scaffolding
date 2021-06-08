@@ -1,8 +1,9 @@
 package com.rubin.rpan.common.config;
 
 import com.rubin.rpan.common.constant.CommonConstant;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.HibernateValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -17,8 +18,9 @@ import javax.validation.ValidatorFactory;
  * Created by RubinChu on 2021/1/22 下午 4:11
  */
 @SpringBootConfiguration
-@Slf4j
 public class ValidatorConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(ValidatorConfig.class);
 
     /**
      * 快速失败key

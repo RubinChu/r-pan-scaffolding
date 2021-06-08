@@ -1,13 +1,11 @@
 package com.rubin.rpan.common.util;
 
-import com.rubin.rpan.common.constant.CommonConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,7 +27,7 @@ public class RedisUtil {
      * @param value
      * @param timeout
      */
-    public void setString(final String key, String value, long timeout) {
+    public void set(final String key, Object value, long timeout) {
         redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.MILLISECONDS);
     }
 
@@ -39,12 +37,9 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public String getString(final String key) {
+    public Object get(final String key) {
         Object value = redisTemplate.opsForValue().get(key);
-        if (Objects.isNull(value)) {
-            return CommonConstant.NULL_STR;
-        }
-        return String.valueOf(value);
+        return value;
     }
 
     /**

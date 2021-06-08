@@ -2,47 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.rubin.rpan.modules.file.dao.RPanFileMapper">
     <resultMap id="BaseResultMap" type="com.rubin.rpan.modules.file.entity.RPanFile">
-        <id column="id" jdbcType="INTEGER" property="id"/>
-        <result column="file_id" jdbcType="VARCHAR" property="fileId"/>
+        <id column="file_id" jdbcType="BIGINT" property="fileId"/>
         <result column="filename" jdbcType="VARCHAR" property="filename"/>
         <result column="real_path" jdbcType="VARCHAR" property="realPath"/>
         <result column="file_size" jdbcType="VARCHAR" property="fileSize"/>
         <result column="file_size_desc" jdbcType="VARCHAR" property="fileSizeDesc"/>
         <result column="file_suffix" jdbcType="VARCHAR" property="fileSuffix"/>
         <result column="file_preview_content_type" jdbcType="VARCHAR" property="filePreviewContentType"/>
-        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_user" jdbcType="BIGINT" property="createUser"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, file_id, filename, real_path, file_size, file_size_desc, file_suffix, file_preview_content_type,
-        create_user, create_time
+        file_id, filename, real_path, file_size, file_size_desc, file_suffix, file_preview_content_type, create_user, create_time
     </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from r_pan.r_pan_file
-        where id = #{id,jdbcType=INTEGER}
+        from r_pan_file
+        where file_id = #{id,jdbcType=BIGINT}
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from r_pan.r_pan_file
-    where id = #{id,jdbcType=INTEGER}
-  </delete>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from r_pan_file
+        where file_id = #{id,jdbcType=BIGINT}
+    </delete>
     <insert id="insert" parameterType="com.rubin.rpan.modules.file.entity.RPanFile">
-    insert into r_pan.r_pan_file (file_id, filename,
-      real_path, file_size, file_size_desc,
-      file_suffix, file_preview_content_type, create_user,
-      create_time)
-    values (#{fileId,jdbcType=VARCHAR}, #{filename,jdbcType=VARCHAR},
-      #{realPath,jdbcType=VARCHAR}, #{fileSize,jdbcType=VARCHAR}, #{fileSizeDesc,jdbcType=VARCHAR},
-      #{fileSuffix,jdbcType=VARCHAR}, #{filePreviewContentType,jdbcType=VARCHAR}, #{createUser,jdbcType=VARCHAR},
-      #{createTime,jdbcType=TIMESTAMP})
+        insert into r_pan_file (file_id, filename, real_path,
+          file_size, file_size_desc, file_suffix,
+          file_preview_content_type, create_user, create_time
+          )
+        values (#{fileId,jdbcType=BIGINT}, #{filename,jdbcType=VARCHAR}, #{realPath,jdbcType=VARCHAR},
+          #{fileSize,jdbcType=VARCHAR}, #{fileSizeDesc,jdbcType=VARCHAR}, #{fileSuffix,jdbcType=VARCHAR},
+          #{filePreviewContentType,jdbcType=VARCHAR}, #{createUser,jdbcType=BIGINT}, #{createTime,jdbcType=TIMESTAMP}
+          )
   </insert>
     <insert id="insertSelective" parameterType="com.rubin.rpan.modules.file.entity.RPanFile">
-        insert into r_pan.r_pan_file
+        insert into r_pan_file
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                id,
-            </if>
             <if test="fileId != null">
                 file_id,
             </if>
@@ -72,11 +67,8 @@
             </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">
-                #{id,jdbcType=INTEGER},
-            </if>
             <if test="fileId != null">
-                #{fileId,jdbcType=VARCHAR},
+                #{fileId,jdbcType=BIGINT},
             </if>
             <if test="filename != null">
                 #{filename,jdbcType=VARCHAR},
@@ -97,7 +89,7 @@
                 #{filePreviewContentType,jdbcType=VARCHAR},
             </if>
             <if test="createUser != null">
-                #{createUser,jdbcType=VARCHAR},
+                #{createUser,jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 #{createTime,jdbcType=TIMESTAMP},
@@ -105,11 +97,8 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.rubin.rpan.modules.file.entity.RPanFile">
-        update r_pan.r_pan_file
+        update r_pan_file
         <set>
-            <if test="fileId != null">
-                file_id = #{fileId,jdbcType=VARCHAR},
-            </if>
             <if test="filename != null">
                 filename = #{filename,jdbcType=VARCHAR},
             </if>
@@ -129,27 +118,26 @@
                 file_preview_content_type = #{filePreviewContentType,jdbcType=VARCHAR},
             </if>
             <if test="createUser != null">
-                create_user = #{createUser,jdbcType=VARCHAR},
+                create_user = #{createUser,jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime,jdbcType=TIMESTAMP},
             </if>
         </set>
-        where id = #{id,jdbcType=INTEGER}
+        where file_id = #{fileId,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.rubin.rpan.modules.file.entity.RPanFile">
-    update r_pan.r_pan_file
-    set file_id = #{fileId,jdbcType=VARCHAR},
-      filename = #{filename,jdbcType=VARCHAR},
-      real_path = #{realPath,jdbcType=VARCHAR},
-      file_size = #{fileSize,jdbcType=VARCHAR},
-      file_size_desc = #{fileSizeDesc,jdbcType=VARCHAR},
-      file_suffix = #{fileSuffix,jdbcType=VARCHAR},
-      file_preview_content_type = #{filePreviewContentType,jdbcType=VARCHAR},
-      create_user = #{createUser,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=INTEGER}
-  </update>
+        update r_pan_file
+        set filename = #{filename,jdbcType=VARCHAR},
+          real_path = #{realPath,jdbcType=VARCHAR},
+          file_size = #{fileSize,jdbcType=VARCHAR},
+          file_size_desc = #{fileSizeDesc,jdbcType=VARCHAR},
+          file_suffix = #{fileSuffix,jdbcType=VARCHAR},
+          file_preview_content_type = #{filePreviewContentType,jdbcType=VARCHAR},
+          create_user = #{createUser,jdbcType=BIGINT},
+          create_time = #{createTime,jdbcType=TIMESTAMP}
+        where file_id = #{fileId,jdbcType=BIGINT}
+    </update>
 
     <!--===================================================================自定义===================================================================-->
 
@@ -157,16 +145,16 @@
         SELECT
             <include refid="Base_Column_List"/>
         FROM
-            r_pan.r_pan_file
+            r_pan_file
         WHERE
             file_id IN
-            <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
-                #{item}
-            </foreach>
+        <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
     </select>
 
     <delete id="deleteBatch">
-        DELETE FROM r_pan.r_pan_file WHERE file_id IN
+        DELETE FROM r_pan_file WHERE file_id IN
         <foreach collection="fileIdList" open="(" close=")" item="item" separator=",">
             #{item}
         </foreach>

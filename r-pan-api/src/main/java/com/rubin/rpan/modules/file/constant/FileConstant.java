@@ -1,8 +1,5 @@
 package com.rubin.rpan.modules.file.constant;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import java.io.File;
 
 /**
@@ -29,23 +26,37 @@ public class FileConstant {
     /**
      * 是否是文件夹枚举类
      */
-    @AllArgsConstructor
-    @Getter
     public enum FolderFlagEnum {
         NO(0),
         YES(1);
+
+        FolderFlagEnum(Integer code) {
+            this.code = code;
+        }
+
         private Integer code;
+
+        public Integer getCode() {
+            return code;
+        }
     }
 
     /**
      * 是否删除
      */
-    @AllArgsConstructor
-    @Getter
     public enum DelFlagEnum {
         NO(0),
         YES(1);
+
+        DelFlagEnum(Integer code) {
+            this.code = code;
+        }
+
         private Integer code;
+
+        public Integer getCode() {
+            return code;
+        }
     }
 
 }

@@ -15,24 +15,24 @@ import java.util.Set;
 @Repository(value = "rPanShareMapper")
 public interface RPanShareMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByPrimaryKey(Long shareId);
 
     int insert(RPanShare record);
 
     int insertSelective(RPanShare record);
 
-    RPanShare selectByPrimaryKey(Integer id);
+    RPanShare selectByPrimaryKey(Long shareId);
 
     int updateByPrimaryKeySelective(RPanShare record);
 
     int updateByPrimaryKey(RPanShare record);
 
-    List<RPanUserShareUrlVO> selectRPanUserShareUrlVOListByUserId(@Param("userId") String userId);
+    List<RPanUserShareUrlVO> selectRPanUserShareUrlVOListByUserId(@Param("userId") Long userId);
 
-    int deleteByShareIdListAndUserId(@Param("shareIdList") List<String> shareIdList, @Param("userId") String userId);
+    int deleteByShareIdListAndUserId(@Param("shareIdList") List<Long> shareIdList, @Param("userId") Long userId);
 
     RPanShare selectByShareId(@Param("shareId") String shareId);
 
-    int changeShareStatusByShareId(@Param("shareIds") Set<String> shareIds, @Param("shareStatus") Integer shareStatus);
+    int changeShareStatusByShareId(@Param("shareId") Long shareId, @Param("shareStatus") Integer shareStatus);
 
 }

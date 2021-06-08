@@ -10,10 +10,10 @@ import java.util.List;
  */
 public interface IRecycleBinService {
 
-    List<RPanUserFileVO> list(String userId);
+    List<RPanUserFileVO> list(Long userId);
 
-    List<RPanUserFileVO> restore(String fileIds, String userId);
+    List<RPanUserFileVO> restore(String fileIds, Long userId);
 
-    List<RPanUserFileVO> delete(String fileIds, String userId);
+    List<RPanUserFileVO> delete(String fileIds, Long userId);
 
 }

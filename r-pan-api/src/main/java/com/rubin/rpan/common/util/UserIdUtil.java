@@ -1,7 +1,8 @@
 package com.rubin.rpan.common.util;
 
 import com.rubin.rpan.common.constant.CommonConstant;
-import org.apache.commons.lang3.StringUtils;
+
+import java.util.Objects;
 
 /**
  * 用户ID工具类
@@ -9,14 +10,14 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class UserIdUtil {
 
-    private static ThreadLocal<String> threadLocal = new ThreadLocal<>();
+    private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
     /**
      * 设置当前登录的用户ID
      *
      * @param value
      */
-    public static void set(String value) {
+    public static void set(Long value) {
         threadLocal.set(value);
     }
 
@@ -25,10 +26,10 @@ public class UserIdUtil {
      *
      * @return
      */
-    public static String get() {
-        String value = threadLocal.get();
-        if (StringUtils.isBlank(value)) {
-            return CommonConstant.EMPTY_STR;
+    public static Long get() {
+        Long value = threadLocal.get();
+        if (Objects.isNull(value)) {
+            return CommonConstant.ZERO_LONG;
         }
         return value;
     }

@@ -18,8 +18,10 @@ import com.rubin.rpan.modules.share.vo.RPanUserShareDetailVO;
 import com.rubin.rpan.modules.share.vo.RPanUserShareSimpleDetailVO;
 import com.rubin.rpan.modules.share.vo.RPanUserShareUrlVO;
 import com.rubin.rpan.modules.user.service.IUserService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,9 @@ import java.util.stream.Collectors;
  */
 @Service(value = "shareService")
 @Transactional
-@Slf4j
 public class ShareServiceImpl implements IShareService {
+
+    private static final Logger log = LoggerFactory.getLogger(ShareServiceImpl.class);
 
     @Autowired
     @Qualifier(value = "rPanShareMapper")
@@ -59,8 +62,8 @@ public class ShareServiceImpl implements IShareService {
     private FileShareConfig fileShareConfig;
 
     @Autowired
-    @Qualifier(value = "redisUtil")
-    private RedisUtil redisUtil;
+    @Qualifier(value = "idGenerator")
+    private IdGenerator idGenerator;
 
     /**
      * 创建分享链接
@@ -73,7 +76,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public RPanUserShareUrlVO create(String shareName, Integer shareType, Integer shareDayType, String shareFileIds, String userId) {
+    public RPanUserShareUrlVO create(String shareName, Integer shareType, Integer shareDayType, String shareFileIds, Long userId) {
         RPanShare rPanShare = saveShare(shareName, shareType, shareDayType, userId);
         saveShareFile(rPanShare.getShareId(), shareFileIds, userId);
         return assembleShareUrlVO(rPanShare);
@@ -86,7 +89,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public List<RPanUserShareUrlVO> list(String userId) {
+    public List<RPanUserShareUrlVO> list(Long userId) {
         return rPanShareMapper.selectRPanUserShareUrlVOListByUserId(userId);
     }
 
@@ -98,7 +101,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public void cancel(String shareIds, String userId) {
+    public void cancel(String shareIds, Long userId) {
         cancelShares(shareIds, userId);
         cancelShareFiles(shareIds);
     }
@@ -110,7 +113,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public RPanUserShareDetailVO detail(String shareId) {
+    public RPanUserShareDetailVO detail(Long shareId) {
         RPanShare rPanShare = checkShareStatus(shareId);
         return assembleShareDetailVO(rPanShare);
     }
@@ -122,7 +125,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public RPanUserShareSimpleDetailVO simpleDetail(String shareId) {
+    public RPanUserShareSimpleDetailVO simpleDetail(Long shareId) {
         RPanShare rPanShare = checkShareStatus(shareId);
         RPanUserShareSimpleDetailVO rPanUserShareSimpleDetailVO = new RPanUserShareSimpleDetailVO(rPanShare);
         rPanUserShareSimpleDetailVO.setShareUserInfoVO(iUserService.getShareUserInfo(rPanShare.getCreateUser()));
@@ -137,32 +140,28 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public String checkShareCode(String shareId, String shareCode) {
+    public String checkShareCode(Long shareId, String shareCode) {
         RPanShare rPanShare = checkShareStatus(shareId);
         if (!Objects.equals(rPanShare.getShareCode(), shareCode)) {
             throw new RPanException("分享码错误");
         }
         String token = JwtUtil.generateToken(UUIDUtil.getUUID(), CommonConstant.SHARE_ID, shareId, CommonConstant.ONE_HOUR_LONG);
-        redisUtil.setString(CommonConstant.SHARE_CODE_PREFIX + shareId, token, CommonConstant.ONE_HOUR_LONG);
         return token;
     }
 
     /**
-     * 通过文件id修改相关的分享状态
+     * 通过文件id刷新相关分享的分享状态
      *
      * @param fileIds
-     * @param shareStatus
      */
     @Override
-    public void changeShareStatus(String fileIds, ShareConstant.ShareStatus shareStatus) {
-        List<String> shareIds = iShareFileService.getShareIdByFileIds(fileIds);
+    public void refreshShareStatus(String fileIds) {
+        List<Long> shareIds = iShareFileService.getShareIdByFileIds(fileIds);
         if (CollectionUtils.isEmpty(shareIds)) {
             return;
         }
-        Set<String> shareIdSet = new HashSet<>(shareIds);
-        if (rPanShareMapper.changeShareStatusByShareId(shareIdSet, shareStatus.getCode()) != shareIdSet.size()) {
-            throw new RPanException("更新分享状态失败");
-        }
+        Set<Long> shareIdSet = new HashSet<>(shareIds);
+        shareIdSet.stream().forEach(this::refreshOneShareStatus);
     }
 
     /**
@@ -173,9 +172,9 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public List<RPanUserFileVO> fileList(String shareId, String parentId) {
+    public List<RPanUserFileVO> fileList(Long shareId, Long parentId) {
         checkShareStatus(shareId);
-        List<RPanUserFileVO> rPanUserFileVOList = checkFileIsOnShareStatusAndGetAllShareUserFiles(shareId, parentId);
+        List<RPanUserFileVO> rPanUserFileVOList = checkFileIsOnShareStatusAndGetAllShareUserFiles(shareId, StringListUtil.longListToString(parentId));
         rPanUserFileVOList = rPanUserFileVOList.stream().collect(Collectors.groupingBy(RPanUserFileVO::getParentId)).get(parentId);
         if (CollectionUtils.isEmpty(rPanUserFileVOList)) {
             return Lists.newArrayList();
@@ -192,7 +191,7 @@ public class ShareServiceImpl implements IShareService {
      * @return
      */
     @Override
-    public void save(String shareId, String fileIds, String targetParentId, String userId) {
+    public void save(Long shareId, String fileIds, Long targetParentId, Long userId) {
         checkShareStatus(shareId);
         checkFileIsOnShareStatus(shareId, fileIds);
         iUserFileService.saveBatch(fileIds, targetParentId, userId);
@@ -206,9 +205,9 @@ public class ShareServiceImpl implements IShareService {
      * @param response
      */
     @Override
-    public void download(String shareId, String fileId, HttpServletResponse response) {
+    public void download(Long shareId, Long fileId, HttpServletResponse response) {
         checkShareStatus(shareId);
-        checkFileIsOnShareStatus(shareId, fileId);
+        checkFileIsOnShareStatus(shareId, StringListUtil.longListToString(fileId));
         iUserFileService.download(fileId, response);
     }
 
@@ -223,7 +222,7 @@ public class ShareServiceImpl implements IShareService {
      * @param userId
      * @return
      */
-    private RPanShare saveShare(String shareName, Integer shareType, Integer shareDayType, String userId) {
+    private RPanShare saveShare(String shareName, Integer shareType, Integer shareDayType, Long userId) {
         RPanShare rPanShare = assembleShareEntity(shareName, shareType, shareDayType, userId);
         if (rPanShareMapper.insertSelective(rPanShare) != CommonConstant.ONE_INT) {
             throw new RPanException("创建分享链接失败");
@@ -238,7 +237,7 @@ public class ShareServiceImpl implements IShareService {
      * @param shareFileIds
      * @param userId
      */
-    private void saveShareFile(String shareId, String shareFileIds, String userId) {
+    private void saveShareFile(Long shareId, String shareFileIds, Long userId) {
         iShareFileService.saveBatch(shareId, shareFileIds, userId);
     }
 
@@ -251,24 +250,24 @@ public class ShareServiceImpl implements IShareService {
      * @param userId
      * @return
      */
-    private RPanShare assembleShareEntity(String shareName, Integer shareType, Integer shareDayType, String userId) {
+    private RPanShare assembleShareEntity(String shareName, Integer shareType, Integer shareDayType, Long userId) {
         RPanShare rPanShare = new RPanShare();
         Integer shareDay = ShareConstant.ShareDayType.getDaysByCode(shareDayType);
         if (Objects.equals(CommonConstant.MINUS_ONE_INT, shareDay)) {
             throw new RPanException("分享天数获取失败");
         }
-        String shareId = UUIDUtil.getUUID();
-        rPanShare.setShareId(shareId)
-                .setShareName(shareName)
-                .setShareType(shareType)
-                .setShareDayType(shareDayType)
-                .setShareDay(shareDay)
-                .setShareEndTime(DateUtil.afterDays(shareDay))
-                .setShareUrl(createShareUrl(shareId))
-                .setShareCode(ShareCodeUtil.get())
-                .setShareStatus(ShareConstant.ShareStatus.NORMAL.getCode())
-                .setCreateUser(userId)
-                .setCreateTime(new Date());
+        Long shareId = idGenerator.nextId();
+        rPanShare.setShareId(shareId);
+        rPanShare.setShareName(shareName);
+        rPanShare.setShareType(shareType);
+        rPanShare.setShareDayType(shareDayType);
+        rPanShare.setShareDay(shareDay);
+        rPanShare.setShareEndTime(DateUtil.afterDays(shareDay));
+        rPanShare.setShareUrl(createShareUrl(shareId));
+        rPanShare.setShareCode(ShareCodeUtil.get());
+        rPanShare.setShareStatus(ShareConstant.ShareStatus.NORMAL.getCode());
+        rPanShare.setCreateUser(userId);
+        rPanShare.setCreateTime(new Date());
         return rPanShare;
     }
 
@@ -278,7 +277,7 @@ public class ShareServiceImpl implements IShareService {
      * @param shareId
      * @return
      */
-    private String createShareUrl(String shareId) {
+    private String createShareUrl(Long shareId) {
         return fileShareConfig.getPrefix() + shareId;
     }
 
@@ -290,11 +289,11 @@ public class ShareServiceImpl implements IShareService {
      */
     private RPanUserShareUrlVO assembleShareUrlVO(RPanShare rPanShare) {
         RPanUserShareUrlVO rPanUserShareUrlVO = new RPanUserShareUrlVO();
-        rPanUserShareUrlVO.setShareId(rPanShare.getShareId())
-                .setShareName(rPanShare.getShareName())
-                .setShareUrl(rPanShare.getShareUrl())
-                .setShareCode(rPanShare.getShareCode())
-                .setShareStatus(rPanShare.getShareStatus());
+        rPanUserShareUrlVO.setShareId(rPanShare.getShareId());
+        rPanUserShareUrlVO.setShareName(rPanShare.getShareName());
+        rPanUserShareUrlVO.setShareUrl(rPanShare.getShareUrl());
+        rPanUserShareUrlVO.setShareCode(rPanShare.getShareCode());
+        rPanUserShareUrlVO.setShareStatus(rPanShare.getShareStatus());
         return rPanUserShareUrlVO;
     }
 
@@ -304,8 +303,8 @@ public class ShareServiceImpl implements IShareService {
      * @param shareIds
      * @param userId
      */
-    private void cancelShares(String shareIds, String userId) {
-        List<String> shareIdList = Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(shareIds);
+    private void cancelShares(String shareIds, Long userId) {
+        List<Long> shareIdList = StringListUtil.string2LongList(shareIds);
         if (rPanShareMapper.deleteByShareIdListAndUserId(shareIdList, userId) != shareIdList.size()) {
             throw new RPanException("取消分享失败");
         }
@@ -328,7 +327,7 @@ public class ShareServiceImpl implements IShareService {
      */
     private RPanUserShareDetailVO assembleShareDetailVO(RPanShare rPanShare) {
         RPanUserShareDetailVO rPanUserShareDetailVO = new RPanUserShareDetailVO(rPanShare);
-        rPanUserShareDetailVO.setRPanUserFileVOList(iShareFileService.getShareFileInfos(rPanShare.getShareId()));
+        rPanUserShareDetailVO.setrPanUserFileVOList(iShareFileService.getShareFileInfos(rPanShare.getShareId()));
         rPanUserShareDetailVO.setShareUserInfoVO(iUserService.getShareUserInfo(rPanShare.getCreateUser()));
         return rPanUserShareDetailVO;
     }
@@ -338,8 +337,8 @@ public class ShareServiceImpl implements IShareService {
      *
      * @param shareId
      */
-    private RPanShare checkShareStatus(String shareId) {
-        RPanShare rPanShare = rPanShareMapper.selectByShareId(shareId);
+    private RPanShare checkShareStatus(Long shareId) {
+        RPanShare rPanShare = rPanShareMapper.selectByPrimaryKey(shareId);
         if (Objects.isNull(rPanShare)) {
             throw new RPanException(ResponseCode.SHARE_CANCELLED);
         }
@@ -362,14 +361,14 @@ public class ShareServiceImpl implements IShareService {
      * @param fileIds
      * @return
      */
-    private List<RPanUserFileVO> checkFileIsOnShareStatusAndGetAllShareUserFiles(String shareId, String fileIds) {
+    private List<RPanUserFileVO> checkFileIsOnShareStatusAndGetAllShareUserFiles(Long shareId, String fileIds) {
         List<RPanUserFileVO> rPanUserFileVOList = iShareFileService.getAllShareFileInfos(shareId);
         if (CollectionUtils.isEmpty(rPanUserFileVOList)) {
             throw new RPanException("分享信息不可用");
         }
-        Set<String> shareFileIdSet = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toSet());
+        Set<Long> shareFileIdSet = rPanUserFileVOList.stream().map(RPanUserFileVO::getFileId).collect(Collectors.toSet());
         int originSize = shareFileIdSet.size();
-        shareFileIdSet.addAll(Splitter.on(CommonConstant.COMMON_SEPARATOR).splitToList(fileIds));
+        shareFileIdSet.addAll(StringListUtil.string2LongList(fileIds));
         if (originSize != shareFileIdSet.size()) {
             throw new RPanException(ResponseCode.ERROR_PARAM);
         }
@@ -382,8 +381,38 @@ public class ShareServiceImpl implements IShareService {
      * @param shareId
      * @param fileIds
      */
-    private void checkFileIsOnShareStatus(String shareId, String fileIds) {
+    private void checkFileIsOnShareStatus(Long shareId, String fileIds) {
         checkFileIsOnShareStatusAndGetAllShareUserFiles(shareId, fileIds);
     }
+
+    /**
+     * 刷新一个分享的状态
+     *
+     * @param shareId
+     */
+    private void refreshOneShareStatus(Long shareId) {
+        ShareConstant.ShareStatus shareStatus = ShareConstant.ShareStatus.NORMAL;
+        if (!checkShareFileAvailable(shareId)) {
+            shareStatus = ShareConstant.ShareStatus.FILE_DELETED;
+        }
+        if (rPanShareMapper.selectByPrimaryKey(shareId).getShareStatus().equals(shareStatus.getCode())) {
+            return;
+        }
+        if (rPanShareMapper.changeShareStatusByShareId(shareId, shareStatus.getCode()) != CommonConstant.ONE_INT) {
+            throw new RPanException("更新分享状态失败");
+        }
+    }
+
+    /**
+     * 校验分享文件是否有效
+     *
+     * @param shareId
+     * @return
+     */
+    private boolean checkShareFileAvailable(Long shareId) {
+        List<Long> fileIds = iShareFileService.getFileIdsByShareId(shareId);
+        return iUserFileService.checkAllUpFileAvailable(fileIds);
+    }
+
 
 }
