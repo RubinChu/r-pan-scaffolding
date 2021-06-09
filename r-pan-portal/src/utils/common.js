@@ -27,9 +27,9 @@ let panUtil = {
         const second = date.getSeconds()
         return [year, month, day].map(this.formatNumber).join('-') + ' ' + [hour, minute, second].map(this.formatNumber).join(':')
     },
-    // TODO Your file preview uri prefix. example for dev:http://127.0.0.1:7000/preview?fileId=111&token=xx15456xwwx
+    // TODO Your file preview uri prefix. example for dev:http://127.0.0.1:7000/preview?fileId=111&authorization=xx15456xwwx
     getPreviewUrl(fileId) {
-        return 'http(s)://api-domain:port/preview?fileId=' + fileId + '&token=' + getToken()
+        return 'http(s)://api-domain:port/preview?fileId=' + fileId + '&authorization=' + getToken()
     },
     // TODO Your http uri prefix. example for dev:http://127.0.0.1:7000/
     getUrlPrefix() {
