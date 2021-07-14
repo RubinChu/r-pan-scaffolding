@@ -37,7 +37,6 @@
                     return
                 }
                 if (!_this.item) {
-                    _this.multipleSelection
                     for (let i = 0, iLength = _this.multipleSelection.length; i < iLength; i++) {
                         if (_this.multipleSelection[i].folderFlag === 1) {
                             _this.$message.error('文件夹暂不支持下载')

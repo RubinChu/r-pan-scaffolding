@@ -197,6 +197,7 @@ public class ShareController {
     @GetMapping("share/file/download")
     @NeedShareCode
     @NeedLogin
+    @LogIgnore
     public void download(@NotNull(message = "文件id不能为空") @RequestParam(value = "fileId", required = false) Long fileId,
                          HttpServletResponse response) {
         iShareService.download(ShareIdUtil.get(), fileId, response);

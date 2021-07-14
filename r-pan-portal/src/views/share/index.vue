@@ -88,7 +88,7 @@
                                             <el-button type="success" icon="el-icon-document-copy" size="small" circle @click="saveFiles(scope.row)"/>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="light" content="下载" placement="top">
-                                            <el-button type="info" icon="el-icon-download" size="small" circle @click="doDownloadFile(scope.row)"/>
+                                            <el-button type="info" icon="el-icon-download" size="small" circle @click="doDownload(scope.row)"/>
                                         </el-tooltip>
                                     </div>
                                 </template>
@@ -222,7 +222,7 @@
     import panUtil from '../../utils/common'
     import userService from '../../api/user'
     import fileService from '../../api/file'
-    import {clearToken, setToken, setShareToken, getToken, clearShareToken} from '../../utils/cookie'
+    import {clearToken, setToken, setShareToken, getShareToken, getToken, clearShareToken} from '../../utils/cookie'
     import shareService from '../../api/share'
 
     export default {
@@ -525,13 +525,29 @@
                     _this.$message.error('请选择要下载的文件')
                     return
                 }
-                if (_this.multipleSelection.length > 1) {
-                    _this.$message.error('请选择一个文件进行下载')
+                for (let i = 0, iLength = _this.multipleSelection.length; i < iLength; i++) {
+                    if (_this.multipleSelection[i].folderFlag === 1) {
+                        _this.$message.error('文件夹暂不支持下载')
+                        return
+                    }
+                }
+                _this.doDownLoads(_this.multipleSelection)
+            },
+            doDownLoads(items, i) {
+                let _this = this
+                if (!i) {
+                    i = 0
+                }
+                if (items.length === i) {
                     return
                 }
-                _this.doDownloadFile(_this.multipleSelection[0])
+                setTimeout(function () {
+                    _this.doDownload(items[i]);
+                    i++
+                    _this.doDownLoads(items, i)
+                }, 500);
             },
-            doDownloadFile(item) {
+            doDownload(item) {
                 let _this = this
                 if (item.folderFlag === 1) {
                     _this.$message.error('文件夹暂不支持下载')
@@ -543,7 +559,7 @@
                             shareId: _this.getShareId()
                         }, res => {
                             if (res.status === 0) {
-                                let url = panUtil.getUrlPrefix() + '/file/download?fileId=' + item.fileId + '&authorization=' + getToken(),
+                                let url = panUtil.getUrlPrefix() + '/share/file/download?fileId=' + item.fileId + '&shareToken=' + getShareToken() + '&authorization=' + getToken(),
                                     filename = item.filename,
                                     link = document.createElement('a')
                                 link.style.display = 'none'
@@ -632,6 +648,7 @@
         },
         computed: {},
         mounted() {
+            clearShareToken()
             this.loadShareInfo()
             this.loadUserInfo()
             this.pageLoading = false
