@@ -5,7 +5,7 @@
 'use strict'
 
 import axios from 'axios'
-import { clearToken, getToken, getShareToken, clearShareToken } from './cookie'
+import { getToken, getShareToken } from './cookie'
 import { Message } from 'element-ui'
 import panUtil from './common'
 

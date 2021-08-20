@@ -76,6 +76,13 @@ let fileService = {
             params: params,
             method: 'get'
         }).then(res => resolve(res)).catch(err => reject(err))
+    },
+    secUpload: function (data, resolve, reject) {
+        http({
+            url: '/file/sec-upload',
+            data: data,
+            method: 'post'
+        }).then(res => resolve(res)).catch(err => reject(err))
     }
 }
 

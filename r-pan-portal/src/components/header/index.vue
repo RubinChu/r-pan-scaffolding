@@ -157,7 +157,7 @@
             },
             goLogin() {
                 clearToken()
-                this.$router.push({name: 'Login'})
+                window.location.reload()
             },
             goHome() {
                 window.location.href = '/'

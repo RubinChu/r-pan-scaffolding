@@ -78,7 +78,7 @@
         },
         methods: {
             init() {
-              this.openFilePage()
+                this.openFilePage()
             },
             openFilePage() {
                 this.activeModule = 'files'

@@ -140,13 +140,26 @@ router.beforeEach((to, from, next) => {
         if (toIndexPageList.indexOf(to.name) !== -1) {
             next({name: 'Index'})
         } else {
+            let redirect = from.query.redirect
+            if (!redirect || to.path === redirect) {
+                next()
+            } else {
+                next({
+                    path: redirect
+                })
+            }
             next()
         }
     } else {
         if (whiteList.indexOf(to.name) !== -1) {
             next()
         } else {
-            next({name: 'Login'})
+            next({
+                name: 'Login',
+                query: {
+                    redirect: to.fullPath
+                }
+            })
         }
     }
     NProgress.done()

@@ -19,9 +19,7 @@
 
         },
         computed:{
-            key() {
-                return this.$route.path
-            }
+
         },
         mounted() {
 
