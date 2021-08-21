@@ -13,16 +13,19 @@
             <directory>src/main/resources/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>src/main/resources/config</directory>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0644</fileMode>
+            <lineEnding>unix</lineEnding>
         </fileSet>
         <fileSet>
             <directory>src/main/resources/sql</directory>
             <outputDirectory>sql</outputDirectory>
             <fileMode>0644</fileMode>
+            <lineEnding>unix</lineEnding>
         </fileSet>
     </fileSets>
 
