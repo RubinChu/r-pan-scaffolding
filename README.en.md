@@ -4,16 +4,20 @@
 Source scaffolding for a personal file management system,[r-pan](https://pan.rubinchu.com)based on this scaffolding construction, I hope it will be helpful to friends who have a personal file system quickly.
 
 #### Version 
-v3.1
+v4.0
 
 #### Version Updates
-* Bulk uploads have been added
-* Bulk download functionality has been added
-* Optimized table structure and query efficiency
+* The front-end supports uploading large file fragments, which can be manually switched
+* Use NIO to optimize file processing
+* The backend architecture was adjusted and modular development was adopted
+* The storage module supports local storage, FastDFS and Aliyun OSS, and supports manual switching of configuration files  
+* The cache module supports local storage and Redis storage, and supports manual switching of configuration files 
+* Added the scheduled task module
 * Fixed some bugs
 
 #### Iterate directions for subsequent releases
 * Optimize your website UI
+* Optimize the scheduled task module and integrate the current popular scheduled task framework
 * Optimize uploads, support breakpoint continuation, folder uploads, etc
 * Optimize download, support breakpoint continue download and folder packaging download and so on
 * Optimize sharing, add chat and friend system
@@ -42,23 +46,14 @@ Redis cache middleware
 druid Database connection pool    
 Vue2 + ElementUI Front-end basic framework  
 
-#### Installation tutorial
+#### Details of the document
 
- **_prompt:_** After running this project, the partners can import the project into the project, find all TODOs in the project, and modify them according to the prompts, which will greatly reduce the shelf modification time of the partners. All TODOs are the configuration information that I specially marked out for modification.
-*  **Environment required to run this project:** JDK、MySQL,please install before commissioning  
-*  **Anout Database：** Please install the Mysql database by yourself. After installation, run the sql script under the sql folder under resources to create the user table.
-*  **About back-end projects：** Paste the source code into your partner's own project, find all TODO in the IDE and follow the prompts to modify the configuration. Just start the Spring Boot project.
-*  **About front-end projects：** Paste the source code into your partner's own project, find all TODO in the IDE and follow the prompts to modify the configuration. Installation dependencies: npm i (or use cnpm i to accelerate), after installation, use npm run serve to start local debugging, and npm build to package the production environment.
+ The project details of the document please click [WIKI] (https://gitee.com/RubinChu/r-pan-scaffolding/wikis/%E5%BC%80%E5%A7%8B)  
 
 #### Local debugging
 
 *   **Commissioning project：** After the buddy has configured the environment according to the installation instructions above, start two projects to see the effect. Before starting, please configure all TODOs in the project.
 
-#### Online deployment instructions
-
-*   **Deploy back-end projects:** The specific deployment details will not be mentioned (the small partners can deploy in their own way, such as jenkins deployment or manual package deployment). Here I have written the project startup script under the project's run folder. The small partners can Modify the jar package path in the script (if it is a war package deployment, please ignore this deployment instruction). After running the script, a pid.txt file and a pan.log log file will be generated. You can check the running process ID and Project output log
-*   **Deploy front-end projects：** Friends can use npm run build to build a production environment package. The server can use Apache, Tomcat or Nginx and other web servers. There are many online materials, so I won’t repeat them here.
-
 #### Written at the end
 
-This project will be continuously updated, and I hope to make a little contribution to the small partners who have this need.Have a problem to be able to private letter author or add QQ: 834123196.
+This project will be continuously updated, and I hope to make a little contribution to the small partners who have this need.Have a problem to be able to private letter author.
