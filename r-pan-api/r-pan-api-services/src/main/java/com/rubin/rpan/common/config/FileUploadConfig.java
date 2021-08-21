@@ -19,14 +19,13 @@ public class FileUploadConfig {
 
     private static final Logger log = LoggerFactory.getLogger(FileUploadConfig.class);
 
+    @Value("${spring.servlet.multipart.max-file-size}")
     private static final Long MAX_SIZE = 3L * 1024L;
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {
         MultipartConfigFactory factory = new MultipartConfigFactory();
-        // 单个文件最大3072M
         factory.setMaxFileSize(DataSize.of(MAX_SIZE, DataUnit.MEGABYTES));
-        // 设置总上传数据总大小3072M
         factory.setMaxRequestSize(DataSize.of(MAX_SIZE, DataUnit.MEGABYTES));
         log.debug("RPan文件上传配置完毕！");
         return factory.createMultipartConfig();
