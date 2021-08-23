@@ -48,7 +48,7 @@ druid 数据库连接池
 Vue2 + ElementUI 前端基础框架   
 
 #### 细节文档
-该项目细节的文档请移步[WIKI](https://gitee.com/RubinChu/r-pan-scaffolding/wikis/%E5%BC%80%E5%A7%8B)
+该项目细节的文档请移步[WIKI](https://github.com/RubinChu/r-pan-scaffolding/wiki)
 
 #### 写在最后
 
