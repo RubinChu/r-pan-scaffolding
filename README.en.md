@@ -48,7 +48,7 @@ Vue2 + ElementUI Front-end basic framework
 
 #### Details of the document
 
- The project details of the document please click [WIKI] (https://gitee.com/RubinChu/r-pan-scaffolding/wikis/%E5%BC%80%E5%A7%8B)  
+ The project details of the document please click [WIKI] (https://github.com/RubinChu/r-pan-scaffolding/wiki)  
 
 #### Local debugging
 
